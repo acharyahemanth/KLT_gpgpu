@@ -13,7 +13,7 @@ public:
 			     cv::Mat dest,
 			     std::vector<cv::Point2f>src_pts,
 			     std::vector<cv::Point2f>&tracked_pts,
-			     std::vector<bool>error);
+			     std::vector<bool>&error);
 private:
 	std::vector<cv::Point2f> iterativeTrackerAtAPyramidLevel(cv::Mat source,
 										 cv::Mat dest,
@@ -26,6 +26,8 @@ private:
     cv::Point2f getGradient(cv::Point2f current_p,cv::Mat src, int pyramid_level);
     int getPel(cv::Mat img, float x, float y, int pyramid_level);
     int blt(cv::Mat img, float x, float y);
+    void getA(cv::Point2f p, cv::Mat src, int pyramid_level, cv::Mat &A, cv::Mat &W);
+    void getb(cv::Point2f p, cv::Point2f pred, cv::Mat src, cv::Mat dest, int pyramid_level, cv::Mat &b, cv::Mat &W);
     
 	int num_pyramid_levels;
 	int window_size;

@@ -9,5 +9,8 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/../common/			
 )
 
-add_executable(klt_gpgpu main.cpp)
-target_link_libraries(klt_gpgpu cpu ${ROOT_LIBS})
+add_executable(test_klt_image test_image.cpp)
+target_link_libraries(test_klt_image cpu ${ROOT_LIBS})
+
+add_executable(test_klt_video test_video.cpp)
+target_link_libraries(test_klt_video cpu ${ROOT_LIBS})

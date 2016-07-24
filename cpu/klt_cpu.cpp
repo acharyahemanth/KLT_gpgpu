@@ -19,7 +19,7 @@ void KLT_cpu::execute(cv::Mat source,
 			     cv::Mat dest,
 			     std::vector<cv::Point2f>src_pts,
 			     std::vector<cv::Point2f>&tracked_pts,
-			     std::vector<bool>error){
+			     std::vector<bool>&error){
 	
     source_image_width = source.cols;
     source_image_height = source.rows;
@@ -31,6 +31,7 @@ void KLT_cpu::execute(cv::Mat source,
 
     //At topmost level, prediction is just the source points---
     std::vector<cv::Point2f>prediction = src_pts;
+    error.clear();
 	error.resize(src_pts.size(),false);
     
     //Start from topmost layer and calc optical flow for all pts
@@ -57,34 +58,89 @@ std::vector<cv::Point2f> KLT_cpu::iterativeTrackerAtAPyramidLevel(cv::Mat source
                                               std::vector<bool>&error,
                                               int pyramid_level){
     for(int i=0;i<source_points.size();i++){
-        for(int k=0;k<num_iterations_kl_tracker;k++){//this is suboptimal, need to evaluate A only for k==1
+
+        //Form matrix A once for this source point---
+        cv::Mat W;//weight matrix
+        cv::Mat A;
+        getA(source_points[i], source, pyramid_level, A, W);
+        cv::Mat A_t = A.t();
+        
+        for(int k=0;k<num_iterations_kl_tracker;k++){
             if(error[i])
                 continue;
 
-            //Form matrix A
-            cv::Mat A,b;
-            getAb(source_points[i], prediction[i], source, dest, pyramid_level, A, b);
-            if(A.empty() || b.empty()){
-                error[i] = true;
-                continue;
-            }
+            //Form matrix b---
+            cv::Mat b;
+            getb(source_points[i], prediction[i], source, dest, pyramid_level, b, W);
             
             //Check if the point is trackable looking at eigen values of matrix to be inverted
             
-
-            //Evaluate tracked point -> (A_t*A)^-1 * A_t * b
-            cv::Mat A_t = A.t();
-            cv::Mat tracked_pt = (A_t*A).inv() * A_t * b;
+            //Evaluate tracked point
+            cv::Mat tracked_pt = (A_t*W*A).inv() * A_t * W * b;
             prediction[i] = prediction[i] + cv::Point2f(tracked_pt);
             if(!isPointWithinImage(prediction[i], pyramid_level))
                 error[i] = true;
+            
+            //Bail out if SAD > threshold : account for moving objects in scene
 
             //If point is not moving much, move onto next point---
-//            if(cv::norm(tracked_pt) < min_displacement_exit_criterion_kl_tracker)
-//                break;
+            if(cv::norm(tracked_pt) < min_displacement_exit_criterion_kl_tracker)
+                break;
         }
     }
     return prediction;
+}
+
+void KLT_cpu::getA(cv::Point2f p, cv::Mat src, int pyramid_level, cv::Mat &A, cv::Mat &W){
+    A = cv::Mat::zeros(window_size*window_size, 2, CV_32FC1);
+    W = cv::Mat::zeros(window_size*window_size, window_size*window_size, CV_32FC1);
+    
+    int half_window_size = window_size/2;
+    int pel_ctr=0;
+    for(int y=-half_window_size;y<=half_window_size;y++){
+        for(int x=-half_window_size;x<=half_window_size;x++){
+            cv::Point2f p_i = p+cv::Point2f(x,y);
+            if(!isPointWithinImage(p_i,pyramid_level))
+                continue;
+            
+            //Set weight to 1 to declare as valid
+            W.at<float>(pel_ctr,pel_ctr) = 1;
+            
+            //Calculate value for A matrix
+            cv::Point2f g_xy = getGradient(p_i,src, pyramid_level);
+            A.at<float>(pel_ctr,0) = g_xy.x;
+            A.at<float>(pel_ctr,1) = g_xy.y;
+
+            pel_ctr++;
+        }
+    }
+}
+
+void KLT_cpu::getb(cv::Point2f p, cv::Point2f pred, cv::Mat src, cv::Mat dest, int pyramid_level, cv::Mat &b, cv::Mat &W){
+    b = cv::Mat::zeros(window_size*window_size, 1, CV_32FC1);
+    int half_window_size = window_size/2;
+    
+    int pel_ctr=-1;
+    for(int y=-half_window_size;y<=half_window_size;y++){
+        for(int x=-half_window_size;x<=half_window_size;x++){
+            pel_ctr++;
+            if(W.at<float>(pel_ctr,pel_ctr) < 1e-3)
+                continue;
+                
+            cv::Point2f p_i = p+cv::Point2f(x,y);
+            cv::Point2f pred_i = pred+cv::Point2f(x,y);
+            if(!isPointWithinImage(p_i,pyramid_level) ||
+               !isPointWithinImage(pred_i,pyramid_level)){
+                   W.at<float>(pel_ctr,pel_ctr) = 0;
+                   continue;
+            }
+            
+            //Calculate value for b matrix
+            int b_val = getPel(src, p_i.x, p_i.y, pyramid_level) -
+                        getPel(dest, pred_i.x, pred_i.y, pyramid_level);
+            b.at<float>(pel_ctr,0) = b_val;
+        }
+    }
 }
 
 void KLT_cpu::getAb(cv::Point2f p, cv::Point2f pred, cv::Mat src, cv::Mat dest, int pyramid_level, cv::Mat &A, cv::Mat &b){

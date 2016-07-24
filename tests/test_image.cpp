@@ -6,7 +6,7 @@
 #include <opencv2/opencv.hpp>
 
 #define num_pyramid_levels 3
-#define search_window_size 9
+#define search_window_size 7
 
 int main(){
     cv::Mat src_img = cv::imread(std::string(BASE_TEST_DIR) + "/tests/marker.png");
