@@ -28,6 +28,11 @@
 *.out
 *.app
 
+#media
+*.jpg
+*.png
+*.mp4
+
 build/
 externals/
 xcode/
