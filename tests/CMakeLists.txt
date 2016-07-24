@@ -10,4 +10,4 @@ include_directories(
 )
 
 add_executable(klt_gpgpu main.cpp)
-target_link_libraries(klt_gpgpu ${ROOT_LIBS})
+target_link_libraries(klt_gpgpu cpu ${ROOT_LIBS})
