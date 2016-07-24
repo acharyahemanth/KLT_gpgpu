@@ -5,8 +5,8 @@
 #include <opencv2/videoio.hpp>
 #include <opencv2/opencv.hpp>
 
-#define num_pyramid_levels 1
-#define search_window_size 11
+#define num_pyramid_levels 3
+#define search_window_size 9
 
 int main(){
     cv::Mat src_img = cv::imread(std::string(BASE_TEST_DIR) + "/tests/marker.png");
@@ -53,7 +53,7 @@ int main(){
     cv::cvtColor(output, output, CV_GRAY2BGR);
     std::cout << "Tracked corners are : " << std::endl;
     for(int i=0;i<tracked_corners.size();i++){
-        cv::line(output, input_corners[i], tracked_corners[i], cv::Scalar(0,255,0),5);
+        cv::line(output, input_corners[i], tracked_corners[i], cv::Scalar(0,255,0));
         std::cout << input_corners[i] << "->" << tracked_corners[i] << std::endl;
     }
     cv::imshow("Tracked corners lines", output);

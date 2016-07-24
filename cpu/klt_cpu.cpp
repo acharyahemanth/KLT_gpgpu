@@ -156,6 +156,21 @@ cv::Point2f KLT_cpu::getGradient(cv::Point2f p,cv::Mat src, int pyramid_level){
     return cv::Point2f(gx, gy);
 }
 
+int KLT_cpu::blt(cv::Mat img, float x, float y){
+    int lu_x = (int)x;
+    int lu_y = (int)y;
+    int rd_x = (int)(x+1);
+    int rd_y = (int)(y+1);
+    float alpha_x = x-lu_x;
+    float alpha_y = y-lu_y;
+    
+    float x_interp_lu = (1-alpha_x)*img.at<uchar>(lu_y,lu_x) + alpha_x*img.at<uchar>(lu_y,rd_x);
+    float x_interp_rd = (1-alpha_x)*img.at<uchar>(rd_y,lu_x) + alpha_x*img.at<uchar>(rd_y,rd_x);
+    float final_interp_val = (1-alpha_y)*x_interp_lu + alpha_y*x_interp_rd;
+    
+    return (int)(final_interp_val+0.5);//return the rounded value
+}
+
 //Gets the pel (x,y) at pyramid_level specified
 //Returns 0 for pel outside the image at that level
 int KLT_cpu::getPel(cv::Mat img, float x, float y, int pyramid_level){
@@ -169,7 +184,7 @@ int KLT_cpu::getPel(cv::Mat img, float x, float y, int pyramid_level){
         return 0;
     }
     
-    //    int pel = blt(img, x_level_0, y_level_0);
-    int pel = img.at<uchar>((int)y_level_0, (int)x_level_0);//nn interpolation : replace with BLT!
+//    int pel = img.at<uchar>((int)y_level_0, (int)x_level_0);//nn interpolation
+    int pel = blt(img, x_level_0, y_level_0);
     return pel;
 }
