@@ -44,4 +44,5 @@ SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -w -Waddress -Wc++11-compat -Wchar-sub
 add_subdirectory(externals)
 add_subdirectory(cpu)
 add_subdirectory(gpu)
+add_subdirectory(common)
 add_subdirectory(tests)

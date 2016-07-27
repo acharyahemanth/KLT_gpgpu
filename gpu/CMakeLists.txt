@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.6)
 
-PROJECT (cpu)
+PROJECT (gpu)
 
 include_directories(
 	${PROJECT_SOURCE_DIR}/../common/
 	${PROJECT_SOURCE_DIR}/../externals/gl3w/include	
 )
 
-add_library(cpu klt_cpu.cpp)
+add_library(gpu gl_apis.cpp base_gpgpu.cpp klt_gpu.cpp)
