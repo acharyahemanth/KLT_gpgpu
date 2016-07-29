@@ -268,7 +268,6 @@ void runGPGPU(GLuint fbo, GLuint vao, std::vector<GPGPUOutputTexture>output_text
     int smallest_output_texture_width = output_textures[0].width;
     int smallest_output_texture_height = output_textures[0].height;
     for(int i=0;i<output_textures.size();i++){
-        glBindTexture(GL_TEXTURE_2D, output_textures[i].texture_id);
         glFramebufferTexture(GL_FRAMEBUFFER, output_textures[i].color_attachment, output_textures[i].texture_id, 0);
         DrawBuffers[i] = output_textures[i].color_attachment;
         if(output_textures[i].width < smallest_output_texture_width)
