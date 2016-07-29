@@ -339,7 +339,7 @@ cv::Mat readGPGPUOutputTexture(GLuint fbo, GPGPUOutputTexture t){
     
     glReadBuffer(t.color_attachment);
     glReadPixels(0, 0, t.width, t.height, data_type, GL_FLOAT,gpgpu_output.data);
-    cv::flip(gpgpu_output,gpgpu_output,0);
+//    cv::flip(gpgpu_output,gpgpu_output,0);
     return gpgpu_output;
 }
 

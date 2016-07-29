@@ -116,6 +116,12 @@ void KLT_gpu::loadTexturesWithData(cv::Mat source,
                                    cv::Mat dest,
                                    std::vector<cv::Point2f>source_points,
                                    std::vector<cv::Point2f>prediction){
+    //dbg
+    std::cout << "Source points are -> " << std::endl;
+    for(int i=0;i<source_points.size();i++){
+        std::cout << source_points[i] << std::endl;
+    }
+    
     source_image_id = loadGrayTexture(source);
     dest_image_id = loadGrayTexture(dest);
     cv::Mat source_pts_mat = cv::Mat::zeros(1, source_points.size(), CV_32FC2);
