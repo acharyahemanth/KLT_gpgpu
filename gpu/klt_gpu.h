@@ -12,6 +12,7 @@ public:
                  std::vector<cv::Point2f>src_pts,
                  std::vector<cv::Point2f>&tracked_pts,
                  std::vector<bool>&error);
+    void execute_dbg();
 private:
     void iterativeTrackerAtAPyramidLevel(int pyramid_level);
     void loadTexturesWithData(cv::Mat source,
@@ -27,6 +28,7 @@ private:
     GLuint getA_sh_num_points_id, getA_sh_window_size_id, getA_sh_image_width_id, getA_sh_image_height_id, getA_sh_vao_id, getA_sh_vert_id;
     int texture_pairs_ppong;
     GLuint fbo_id;
+    GLuint dbg_sh_id, dbg_sh_vert_id, dbg_sh_vao_id;
     
     //Output textures
     GPGPUOutputTexture getA_sh_Amat_output;

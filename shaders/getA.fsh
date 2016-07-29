@@ -38,9 +38,6 @@ void main(){
     int window_x = int(mod(float(row_number), float(window_size)));
     int window_y = row_number/window_size;
     
-//    a.xy = vec2(window_x,window_y);
-//    w = window_x;
-    a.xy = vec2(1.0,2.0);
-    w = 10.0;
-
+    a.xy = vec2(window_x,window_y);
+    w = window_x;
 }

@@ -262,8 +262,6 @@ void runGPGPU(GLuint fbo, GLuint vao, std::vector<GPGPUOutputTexture>output_text
     }
         
     
-    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
-    
     //Attach the textures to fbo attachment points---
     glBindFramebuffer(GL_FRAMEBUFFER, fbo);
     GLenum *DrawBuffers = new GLenum[output_textures.size()];
@@ -285,6 +283,8 @@ void runGPGPU(GLuint fbo, GLuint vao, std::vector<GPGPUOutputTexture>output_text
         std::cout << "Error : runGPGPU() : tex not attached successfully..." << std::endl;
         return;
     }
+    
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     
     //Setup viewport to smallest texture
     glViewport(0,0,smallest_output_texture_width,smallest_output_texture_height);

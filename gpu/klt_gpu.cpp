@@ -10,6 +10,7 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size){
     min_displacement_exit_criterion_kl_tracker = 1e-4;
     
     //Shader stuff---
+    //getA.fsh
     std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
     std::string fs = std::string(BASE_TEST_DIR) + "/shaders/getA.fsh";
     getA_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
@@ -20,8 +21,14 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size){
     getA_sh_window_size_id = getUniformLocation(getA_shader_id, "window_size");
     getA_sh_image_width_id = getUniformLocation(getA_shader_id, "image_width");
     getA_sh_image_height_id = getUniformLocation(getA_shader_id, "image_height");
-    getA_sh_vao_id = setupQuadVAO(getA_shader_id);
+    getA_sh_vao_id = setupQuadVAO(getA_sh_vert_id);
     
+    //dbgshader
+//    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
+//    std::string fs = std::string(BASE_TEST_DIR) + "/shaders/dbg_shader.fsh";
+//    dbg_sh_id = LoadShaders( vs.c_str(), fs.c_str() );
+//    dbg_sh_vert_id = getAttribLocation(dbg_sh_id, "vert");
+//    dbg_sh_vao_id = setupQuadVAO(dbg_sh_vert_id);
     
     //Frame buffer that we will be rendering to---
     fbo_id = setupFrameBuffer();
@@ -29,6 +36,31 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size){
 }
 KLT_gpu::~KLT_gpu(){
     
+}
+void KLT_gpu::execute_dbg(){
+    
+    glUseProgram(dbg_sh_id);
+    std::vector<GPGPUOutputTexture>outputs(2);
+    for(int i=0;i<outputs.size();i++){
+        outputs[i].width = 5;
+        outputs[i].height = 5;
+        outputs[i].num_components_per_element = 1;
+        outputs[i].texture_id  = loadFloatTexture(cv::Mat(),
+                                                  1,
+                                                  outputs[i].width,
+                                                  outputs[i].height);
+    }
+    outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
+    outputs[1].color_attachment = GL_COLOR_ATTACHMENT1;
+    
+    runGPGPU(fbo_id,
+             dbg_sh_vao_id,
+             outputs);
+    
+    cv::Mat a = readGPGPUOutputTexture(fbo_id, outputs[0]);
+    cv::Mat b = readGPGPUOutputTexture(fbo_id, outputs[1]);
+    std::cout << "GPGPU output 1 : " << std::endl << a << std::endl;
+    std::cout << "GPGPU output 2 : " << std::endl << b << std::endl;
 }
 
 void KLT_gpu::execute(cv::Mat source,
@@ -110,6 +142,9 @@ void KLT_gpu::loadTexturesWithData(cv::Mat source,
 }
 
 void KLT_gpu::calcA(int pyramid_level){
+    //Use the getA shader
+    glUseProgram(getA_shader_id);
+    
     //Setup output textures
     getA_sh_Amat_output.width = total_number_points_being_tracked;
     getA_sh_Amat_output.height = window_size*window_size;
@@ -156,5 +191,4 @@ void KLT_gpu::calcA(int pyramid_level){
     cv::Mat w = readGPGPUOutputTexture(fbo_id, outputs[1]);
     std::cout << "A mat -> " << std::endl << A << std::endl;
     std::cout << "W mat -> " << std::endl << w << std::endl;
-    std::cout << "done" << std::endl;
 }

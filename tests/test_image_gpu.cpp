@@ -56,6 +56,7 @@ int main(){
    std::vector<cv::Point2f>tracked_corners;
    std::vector<bool>error;
    klt.execute(gray, dest_img, input_corners, tracked_corners, error);
+//    klt.execute_dbg();
    
    
    //Show output----------------
