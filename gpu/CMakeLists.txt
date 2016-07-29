@@ -7,4 +7,4 @@ include_directories(
 	${PROJECT_SOURCE_DIR}/../externals/gl3w/include	
 )
 
-add_library(gpu gl_apis.cpp base_gpgpu.cpp klt_gpu.cpp)
+add_library(gpu gl_apis.cpp klt_gpu.cpp)

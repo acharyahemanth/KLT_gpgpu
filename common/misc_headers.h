@@ -2,7 +2,7 @@
 #define MISCH
 
 //GL---
-#include "gl_setup.h"
+// #include "gl_setup.h"
 
 //OpenCV---
 #include "opencv2/imgproc/imgproc.hpp"

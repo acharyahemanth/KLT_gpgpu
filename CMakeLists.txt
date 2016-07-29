@@ -30,6 +30,7 @@ SET(GL_LIBS
     ${OPENGL_LIBRARIES}
 )
 SET(ROOT_LIBS
+  common
   ${GL_LIBS}
   ${OpenCV_LIBS}
   "-framework CoreFoundation"
@@ -41,8 +42,8 @@ SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -std=c++11" )
 SET( CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} -w -Waddress -Wc++11-compat -Wchar-subscripts -Wformat -Winit-self -Wmaybe-uninitialized -Wnarrowing -Wnonnull -Wparentheses -Wreorder -Wreturn-type -Wsequence-point -Wsign-compare -Wsizeof-pointer-memaccess -Wstrict-aliasing -Wstrict-overflow=1 -Wswitch -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunused-function -Wunused-label -Wunused-value -Wunused-variable -Wvolatile-register-var" )
 
 ###################################
+add_subdirectory(common)
+add_subdirectory(gpu)
 add_subdirectory(externals)
 add_subdirectory(cpu)
-add_subdirectory(gpu)
-add_subdirectory(common)
 add_subdirectory(tests)

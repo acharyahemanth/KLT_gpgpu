@@ -40,8 +40,6 @@ GLFWwindow* createContext(int window_width, int window_height, bool off_screen){
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
-
-
     int major, minor, rev;
     glfwGetVersion(&major, &minor, &rev);
     printf("GLFW version received: %d.%d.%d\n", major, minor, rev);
@@ -55,4 +53,5 @@ void loadGLExtensions(){
         std::cout << "failed to initialize OpenGL" << std::endl;
         // throw GLException("Failed to initialize OpenGL", ERROR_GL_INIT);
     }
+
 }
