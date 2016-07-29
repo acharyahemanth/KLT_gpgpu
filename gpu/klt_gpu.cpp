@@ -84,8 +84,8 @@ void KLT_gpu::loadTexturesWithData(cv::Mat source,
                                    cv::Mat dest,
                                    std::vector<cv::Point2f>source_points,
                                    std::vector<cv::Point2f>prediction){
-    source_image_id = loadRGBTexture(source);
-    dest_image_id = loadRGBTexture(dest);
+    source_image_id = loadGrayTexture(source);
+    dest_image_id = loadGrayTexture(dest);
     cv::Mat source_pts_mat = cv::Mat::zeros(1, source_points.size(), CV_32FC2);
     cv::Mat prediction_pts_mat = cv::Mat::zeros(1, prediction.size(), CV_32FC2);
     for(int i=0;i<source_points.size();i++){
@@ -155,6 +155,6 @@ void KLT_gpu::calcA(int pyramid_level){
     cv::Mat A = readGPGPUOutputTexture(fbo_id, outputs[0]);
     cv::Mat w = readGPGPUOutputTexture(fbo_id, outputs[1]);
     std::cout << "A mat -> " << std::endl << A << std::endl;
-    std::cout << "W mat -> " << std::endl << A << std::endl;
-    
+    std::cout << "W mat -> " << std::endl << w << std::endl;
+    std::cout << "done" << std::endl;
 }

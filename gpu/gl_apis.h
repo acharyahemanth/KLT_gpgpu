@@ -20,7 +20,7 @@ struct GPGPUOutputTexture{
 
 
 //Setup RGB texture---
-GLuint loadRGBTexture(cv::Mat input);
+GLuint loadGrayTexture(cv::Mat input);
 
 //Setup float textures---
 GLuint loadFloatTexture(cv::Mat ip, int num_components_per_element, int width, int height);

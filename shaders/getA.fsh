@@ -26,12 +26,21 @@ void main(){
 //    float b = texture(b_texture_sampler, tex_uv).x;
 //    float c = texture(c_texture_sampler, tex_uv).x;
     
+    //dbg
+    srcimage_texture_sampler;
+    srcpts_texture_sampler;
+    num_points;
+    image_width;
+    image_height;
 
     //convert row index to an (x,y) location within the window
-    int row_number = gl_FragCoord.y;
-    int window_x = row_number modulo window_size;
-    int window_y = (int)row_number/window_size;
+    int row_number = int(gl_FragCoord.y);
+    int window_x = int(mod(float(row_number), float(window_size)));
+    int window_y = row_number/window_size;
     
-    a.xy = vec2(window_x,window_y);
-    w = window_x;
+//    a.xy = vec2(window_x,window_y);
+//    w = window_x;
+    a.xy = vec2(1.0,2.0);
+    w = 10.0;
+
 }

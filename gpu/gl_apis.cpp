@@ -1,12 +1,12 @@
 #include "gl_apis.h"
 
-GLuint loadRGBTexture(cv::Mat input){
+GLuint loadGrayTexture(cv::Mat input){
     if(input.empty()){
         std::cout << "ERROR : loadRGBTexture() : Empty mat is passed!" << std::endl;
         return 0;
     }
     
-    if(input.channels() != 3){
+    if(input.channels() != 1){
         std::cout << "ERROR : loadRGBTexture() : # channels != 3" << std::endl;
         return 0;
     }
@@ -21,7 +21,7 @@ GLuint loadRGBTexture(cv::Mat input){
     glBindTexture(GL_TEXTURE_2D, textureID);
     
     // Give the image to OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, input_flipped.cols, input_flipped.rows, 0, GL_BGR, GL_UNSIGNED_BYTE, input_flipped.data);
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_R8, input_flipped.cols, input_flipped.rows, 0, GL_RED, GL_UNSIGNED_BYTE, input_flipped.data);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     
@@ -185,7 +185,7 @@ GLint getUniformLocation(GLuint program_ID, std::string unif_name) {
 
 	GLint loc = glGetUniformLocation(program_ID, unif_name.c_str());
 	if (loc == -1) {
-		printf("Couldnt find uniform: %s\n", unif_name.c_str());
+		printf("ERROR : Couldnt find uniform: %s\n", unif_name.c_str());
 	} else {
 		return (loc);
 	}
@@ -195,7 +195,7 @@ GLint getAttribLocation(GLuint program_ID, std::string var_name) {
 
 	GLint loc = glGetAttribLocation(program_ID, var_name.c_str());
 	if (loc == -1) {
-		printf("error in attrib: %s\n", var_name.c_str());
+		printf("ERROR : Unable to find attrib: %s\n", var_name.c_str());
 	} else {
 		return (loc);
 	}
@@ -270,6 +270,7 @@ void runGPGPU(GLuint fbo, GLuint vao, std::vector<GPGPUOutputTexture>output_text
     int smallest_output_texture_width = output_textures[0].width;
     int smallest_output_texture_height = output_textures[0].height;
     for(int i=0;i<output_textures.size();i++){
+        glBindTexture(GL_TEXTURE_2D, output_textures[i].texture_id);
         glFramebufferTexture(GL_FRAMEBUFFER, output_textures[i].color_attachment, output_textures[i].texture_id, 0);
         DrawBuffers[i] = output_textures[i].color_attachment;
         if(output_textures[i].width < smallest_output_texture_width)
@@ -285,8 +286,7 @@ void runGPGPU(GLuint fbo, GLuint vao, std::vector<GPGPUOutputTexture>output_text
         return;
     }
     
-    // Render to our framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    //Setup viewport to smallest texture
     glViewport(0,0,smallest_output_texture_width,smallest_output_texture_height);
     
     // Clear the screen
