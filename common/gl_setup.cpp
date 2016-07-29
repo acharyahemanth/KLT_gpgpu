@@ -1,4 +1,3 @@
-#include "gl_setup.h"
 #include "misc_headers.h"
 #include <iostream>
 

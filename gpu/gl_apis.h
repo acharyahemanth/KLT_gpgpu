@@ -1,7 +1,6 @@
 #ifndef GL_APIS_H
 #define GL_APIS_H
 
-#include "gl_setup.h"
 #include "misc_headers.h"
 #include <string>
 #include <vector>
