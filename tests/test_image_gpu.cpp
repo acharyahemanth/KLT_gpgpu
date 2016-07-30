@@ -1,5 +1,6 @@
 #include "misc_headers.h"
 #include <iostream>
+#include "klt_cpu.h"
 #include "klt_gpu.h"
 #include <opencv2/features2d.hpp>
 #include <opencv2/videoio.hpp>
@@ -92,10 +93,18 @@
      }
      
      //Run KLT--------------------------------
-     KLT_gpu klt(num_pyramid_levels,search_window_size);
+     std::cout << "GPU output -------------- " << std::endl;
+     KLT_gpu klt_gpu(num_pyramid_levels,search_window_size);
      std::vector<cv::Point2f>tracked_corners;
      std::vector<bool>error;
-     klt.execute(source, dest, input_corners, tracked_corners, error);
+     klt_gpu.execute(source, dest, input_corners, tracked_corners, error);
 //     klt.execute_dbg();
+     
+//     std::cout << "CPU output -------------- " << std::endl;
+//     KLT_cpu klt_cpu(num_pyramid_levels,search_window_size);
+//     tracked_corners.clear();
+//     error.clear();
+//     klt_cpu.execute(source, dest, input_corners, tracked_corners, error);
+
 
  }

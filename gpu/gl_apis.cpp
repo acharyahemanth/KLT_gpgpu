@@ -64,7 +64,7 @@ GLuint loadFloatTexture(cv::Mat ip, int num_components_per_element, int width, i
     if(!ip.empty()){// Load texture with data
         //Flip the image because uv indexing has its origin at bottom left
         cv::Mat m = ip.clone();
-        cv::flip(m, m, 0);
+//        cv::flip(m, m, 0);
         glTexImage2D(GL_TEXTURE_2D, 0,internal_format, width, height, 0, data_format, GL_FLOAT, m.data);
     }
     else{// Just setup memory for texture

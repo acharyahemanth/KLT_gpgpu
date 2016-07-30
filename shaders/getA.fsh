@@ -18,26 +18,26 @@ layout(location=0) out vec2 a;
 layout(location=1) out float w;
 
 //Returns the pixel value at the pel specified at the pyramid level specified
-int getPel(vec2 pel){
+float getPel(vec2 pel){
     int shift = (1<<pyramid_level);
     vec2 pel_level0 = vec2(float(pel.x*shift), float(pel.y*shift)).xy;
     vec2 tex_uv = vec2(float(pel_level0.x) / float(image_width),
                        float(pel_level0.y) / float(image_height)).xy;
-    return int(texture(srcimage_texture_sampler, tex_uv).x);
+    return texture(srcimage_texture_sampler, tex_uv).x;
 }
 
 //Function calculates the gradient of the source image at the pixel on the pyramid level specified
 vec2 getGradient(vec2 pel){
     //Get the pels within the 3x3 Sobel window
-    int p_00 = getPel(pel+vec2(-1,-1));
-    int p_01 = getPel(pel+vec2( 0,-1));
-    int p_02 = getPel(pel+vec2( 1,-1));
-    int p_10 = getPel(pel+vec2(-1, 0));
-    int p_11 = getPel(pel+vec2( 0, 0));
-    int p_12 = getPel(pel+vec2( 1, 0));
-    int p_20 = getPel(pel+vec2(-1, 1));
-    int p_21 = getPel(pel+vec2( 0, 1));
-    int p_22 = getPel(pel+vec2( 1, 1));
+    float p_00 = getPel(pel+vec2(-1,-1));
+    float p_01 = getPel(pel+vec2( 0,-1));
+    float p_02 = getPel(pel+vec2( 1,-1));
+    float p_10 = getPel(pel+vec2(-1, 0));
+    float p_11 = getPel(pel+vec2( 0, 0));
+    float p_12 = getPel(pel+vec2( 1, 0));
+    float p_20 = getPel(pel+vec2(-1, 1));
+    float p_21 = getPel(pel+vec2( 0, 1));
+    float p_22 = getPel(pel+vec2( 1, 1));
     
     
     //Gx
@@ -81,12 +81,10 @@ void main(){
     vec2 gradient = getGradient(current_window_location);
     
     //dbg : check source image sampler
-//    int pel = int(texture(srcimage_texture_sampler, vec2(float(150)/float(image_width),
-//                                                         float(150)/float(image_height))).r);
-    int pel = int(texture(srcimage_texture_sampler, vec2(float(coord.x)/float(image_width),
-                                                         float(coord.y)/float(image_height))).r);
+//    int pel = int(texture(srcimage_texture_sampler, vec2(float(100)/float(image_width),
+  //                                                       float(100)/float(image_height))).r);
     
     
-    a.xy = current_window_location.xy;
-    w = pel;
+    a.xy = gradient.xy;
+    w = 55;
 }

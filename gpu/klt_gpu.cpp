@@ -11,25 +11,25 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size){
     
     //Shader stuff---
     //getA.fsh
-//    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
-//    std::string fs = std::string(BASE_TEST_DIR) + "/shaders/getA.fsh";
-//    getA_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
-//    getA_sh_vert_id = getAttribLocation(getA_shader_id, "vert");
-//    getA_sh_srcimage_texture_sampler_id = getUniformLocation(getA_shader_id, "srcimage_texture_sampler");
-//    getA_sh_srcpts_texture_sampler_id = getUniformLocation(getA_shader_id, "srcpts_texture_sampler");
-//    getA_sh_num_points_id = getUniformLocation(getA_shader_id, "num_points");
-//    getA_sh_window_size_id = getUniformLocation(getA_shader_id, "window_size");
-//    getA_sh_image_width_id = getUniformLocation(getA_shader_id, "image_width");
-//    getA_sh_image_height_id = getUniformLocation(getA_shader_id, "image_height");
-//    getA_sh_vao_id = setupQuadVAO(getA_sh_vert_id);
+    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
+    std::string fs = std::string(BASE_TEST_DIR) + "/shaders/getA.fsh";
+    getA_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
+    getA_sh_vert_id = getAttribLocation(getA_shader_id, "vert");
+    getA_sh_srcimage_texture_sampler_id = getUniformLocation(getA_shader_id, "srcimage_texture_sampler");
+    getA_sh_srcpts_texture_sampler_id = getUniformLocation(getA_shader_id, "srcpts_texture_sampler");
+    getA_sh_num_points_id = getUniformLocation(getA_shader_id, "num_points");
+    getA_sh_window_size_id = getUniformLocation(getA_shader_id, "window_size");
+    getA_sh_image_width_id = getUniformLocation(getA_shader_id, "image_width");
+    getA_sh_image_height_id = getUniformLocation(getA_shader_id, "image_height");
+    getA_sh_vao_id = setupQuadVAO(getA_sh_vert_id);
     
     //dbgshader
-    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
-    std::string fs = std::string(BASE_TEST_DIR) + "/shaders/dbg_shader.fsh";
-    dbg_sh_id = LoadShaders( vs.c_str(), fs.c_str() );
-    dbg_sh_vert_id = getAttribLocation(dbg_sh_id, "vert");
-    dbg_sh_ip_texture_sampler = getUniformLocation(dbg_sh_id, "ip_texture_sampler");
-    dbg_sh_vao_id = setupQuadVAO(dbg_sh_vert_id);
+//    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
+//    std::string fs = std::string(BASE_TEST_DIR) + "/shaders/dbg_shader.fsh";
+//    dbg_sh_id = LoadShaders( vs.c_str(), fs.c_str() );
+//    dbg_sh_vert_id = getAttribLocation(dbg_sh_id, "vert");
+//    dbg_sh_ip_texture_sampler = getUniformLocation(dbg_sh_id, "ip_texture_sampler");
+//    dbg_sh_vao_id = setupQuadVAO(dbg_sh_vert_id);
     
     //Frame buffer that we will be rendering to---
     fbo_id = setupFrameBuffer();
@@ -145,10 +145,11 @@ void KLT_gpu::loadTexturesWithData(cv::Mat source,
     for(int i=0;i<source_points.size();i++){
         std::cout << source_points[i] << std::endl;
     }
-    std::cout << "src image pel :  " << (int)source.at<uchar>(150,150) << std::endl;
     
-    source_image_id = loadGrayTexture(source);
-    dest_image_id = loadGrayTexture(dest);
+    source.convertTo(source, CV_32FC1);
+    dest.convertTo(dest, CV_32FC1);
+    source_image_id = loadFloatTexture(source, 1, source.cols, source.rows);
+    dest_image_id = loadFloatTexture(dest, 1, dest.cols, dest.rows);
     cv::Mat source_pts_mat = cv::Mat::zeros(1, source_points.size(), CV_32FC2);
     cv::Mat prediction_pts_mat = cv::Mat::zeros(1, prediction.size(), CV_32FC2);
     for(int i=0;i<source_points.size();i++){

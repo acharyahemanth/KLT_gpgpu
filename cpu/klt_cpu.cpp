@@ -64,6 +64,7 @@ std::vector<cv::Point2f> KLT_cpu::iterativeTrackerAtAPyramidLevel(cv::Mat source
         cv::Mat A;
         getA(source_points[i], source, pyramid_level, A, W);
         cv::Mat A_t = A.t();
+//        std::cout << "Point :" << source_points[i] << " A matrix : " << std::endl << A << std::endl;
         
         for(int k=0;k<num_iterations_kl_tracker;k++){
             if(error[i])
