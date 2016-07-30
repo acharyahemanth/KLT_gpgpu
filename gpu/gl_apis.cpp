@@ -7,7 +7,7 @@ GLuint loadGrayTexture(cv::Mat input){
     }
     
     if(input.channels() != 1){
-        std::cout << "ERROR : loadRGBTexture() : # channels != 3" << std::endl;
+        std::cout << "ERROR : loadRGBTexture() : # channels != 1" << std::endl;
         return 0;
     }
     
@@ -22,8 +22,11 @@ GLuint loadGrayTexture(cv::Mat input){
     
     // Give the image to OpenGL
     glTexImage2D(GL_TEXTURE_2D, 0,GL_R8, input_flipped.cols, input_flipped.rows, 0, GL_RED, GL_UNSIGNED_BYTE, input_flipped.data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    
     
     return textureID;
 }

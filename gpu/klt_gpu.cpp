@@ -121,6 +121,7 @@ void KLT_gpu::loadTexturesWithData(cv::Mat source,
     for(int i=0;i<source_points.size();i++){
         std::cout << source_points[i] << std::endl;
     }
+    std::cout << "src image pel :  " << (int)source.at<uchar>(150,150) << std::endl;
     
     source_image_id = loadGrayTexture(source);
     dest_image_id = loadGrayTexture(dest);

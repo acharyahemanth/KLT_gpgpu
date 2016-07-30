@@ -5,8 +5,7 @@ uniform int num_points;
 uniform int window_size;
 uniform int image_width;
 uniform int image_height;
-//uniform int output_texture_width;
-//uniform int output_texture_height;
+uniform int pyramid_level;
 
 //Texture samplers
 uniform sampler2D srcimage_texture_sampler;
@@ -18,26 +17,55 @@ uniform sampler2D srcpts_texture_sampler;
 layout(location=0) out vec2 a;
 layout(location=1) out float w;
 
-void main(){
-//	vec2 tex_uv;
-//	tex_uv.x = float(gl_FragCoord.x) / float(output_texture_width);
-//	tex_uv.y = float(gl_FragCoord.y) / float(output_texture_height);
-//    float a = texture(a_texture_sampler, tex_uv).x;
-//    float b = texture(b_texture_sampler, tex_uv).x;
-//    float c = texture(c_texture_sampler, tex_uv).x;
+//Returns the pixel value at the pel specified at the pyramid level specified
+int getPel(vec2 pel){
+    int shift = (1<<pyramid_level);
+    vec2 pel_level0 = vec2(float(pel.x*shift), float(pel.y*shift)).xy;
+    vec2 tex_uv = vec2(float(pel_level0.x) / float(image_width),
+                       float(pel_level0.y) / float(image_height)).xy;
+    return int(texture(srcimage_texture_sampler, tex_uv).x);
+}
+
+//Function calculates the gradient of the source image at the pixel on the pyramid level specified
+vec2 getGradient(vec2 pel){
+    //Get the pels within the 3x3 Sobel window
+    int p_00 = getPel(pel+vec2(-1,-1));
+    int p_01 = getPel(pel+vec2( 0,-1));
+    int p_02 = getPel(pel+vec2( 1,-1));
+    int p_10 = getPel(pel+vec2(-1, 0));
+    int p_11 = getPel(pel+vec2( 0, 0));
+    int p_12 = getPel(pel+vec2( 1, 0));
+    int p_20 = getPel(pel+vec2(-1, 1));
+    int p_21 = getPel(pel+vec2( 0, 1));
+    int p_22 = getPel(pel+vec2( 1, 1));
     
-    //dbg
-    srcimage_texture_sampler;
-    num_points;
-    image_width;
-    image_height;
+    
+    //Gx
+    float gx = -1*p_00 +
+               -2*p_10 +
+               -1*p_20 +
+                1*p_02 +
+                2*p_12 +
+                1*p_22;
+    //Gy
+    float gy =  -1*p_00 +
+                -2*p_01 +
+                -1*p_02 +
+                 1*p_20 +
+                 2*p_21 +
+                 1*p_22;
+    
+    return vec2(gx,gy);
+}
+
+
+void main(){
 
     //glFragcoord gives the center of the pixel, ie (0,0) -> (0.5, 0.5)
     vec2 coord = gl_FragCoord.xy - vec2(0.5,0.5);
     
     //Current source corner
-    vec2 tex_uv;
-    tex_uv = vec2(float(coord.x) / float(num_points),
+    vec2 tex_uv = vec2(float(coord.x) / float(num_points),
                   0.0).xy;
     vec2 source_corner = texture(srcpts_texture_sampler, tex_uv).xy;
 
@@ -49,6 +77,16 @@ void main(){
     int window_y = row_number/window_size - half_window_size;
     vec2 current_window_location = source_corner + vec2(window_x, window_y);
     
-    a.xy = source_corner.yx;
-    w = coord.y;
+    //Calculate the gradient at the current point
+    vec2 gradient = getGradient(current_window_location);
+    
+    //dbg : check source image sampler
+//    int pel = int(texture(srcimage_texture_sampler, vec2(float(150)/float(image_width),
+//                                                         float(150)/float(image_height))).r);
+    int pel = int(texture(srcimage_texture_sampler, vec2(float(coord.x)/float(image_width),
+                                                         float(coord.y)/float(image_height))).r);
+    
+    
+    a.xy = current_window_location.xy;
+    w = pel;
 }
