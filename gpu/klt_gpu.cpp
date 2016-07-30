@@ -11,24 +11,25 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size){
     
     //Shader stuff---
     //getA.fsh
-    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
-    std::string fs = std::string(BASE_TEST_DIR) + "/shaders/getA.fsh";
-    getA_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
-    getA_sh_vert_id = getAttribLocation(getA_shader_id, "vert");
-    getA_sh_srcimage_texture_sampler_id = getUniformLocation(getA_shader_id, "srcimage_texture_sampler");
-    getA_sh_srcpts_texture_sampler_id = getUniformLocation(getA_shader_id, "srcpts_texture_sampler");
-    getA_sh_num_points_id = getUniformLocation(getA_shader_id, "num_points");
-    getA_sh_window_size_id = getUniformLocation(getA_shader_id, "window_size");
-    getA_sh_image_width_id = getUniformLocation(getA_shader_id, "image_width");
-    getA_sh_image_height_id = getUniformLocation(getA_shader_id, "image_height");
-    getA_sh_vao_id = setupQuadVAO(getA_sh_vert_id);
+//    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
+//    std::string fs = std::string(BASE_TEST_DIR) + "/shaders/getA.fsh";
+//    getA_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
+//    getA_sh_vert_id = getAttribLocation(getA_shader_id, "vert");
+//    getA_sh_srcimage_texture_sampler_id = getUniformLocation(getA_shader_id, "srcimage_texture_sampler");
+//    getA_sh_srcpts_texture_sampler_id = getUniformLocation(getA_shader_id, "srcpts_texture_sampler");
+//    getA_sh_num_points_id = getUniformLocation(getA_shader_id, "num_points");
+//    getA_sh_window_size_id = getUniformLocation(getA_shader_id, "window_size");
+//    getA_sh_image_width_id = getUniformLocation(getA_shader_id, "image_width");
+//    getA_sh_image_height_id = getUniformLocation(getA_shader_id, "image_height");
+//    getA_sh_vao_id = setupQuadVAO(getA_sh_vert_id);
     
     //dbgshader
-//    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
-//    std::string fs = std::string(BASE_TEST_DIR) + "/shaders/dbg_shader.fsh";
-//    dbg_sh_id = LoadShaders( vs.c_str(), fs.c_str() );
-//    dbg_sh_vert_id = getAttribLocation(dbg_sh_id, "vert");
-//    dbg_sh_vao_id = setupQuadVAO(dbg_sh_vert_id);
+    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
+    std::string fs = std::string(BASE_TEST_DIR) + "/shaders/dbg_shader.fsh";
+    dbg_sh_id = LoadShaders( vs.c_str(), fs.c_str() );
+    dbg_sh_vert_id = getAttribLocation(dbg_sh_id, "vert");
+    dbg_sh_ip_texture_sampler = getUniformLocation(dbg_sh_id, "ip_texture_sampler");
+    dbg_sh_vao_id = setupQuadVAO(dbg_sh_vert_id);
     
     //Frame buffer that we will be rendering to---
     fbo_id = setupFrameBuffer();
@@ -38,12 +39,27 @@ KLT_gpu::~KLT_gpu(){
     
 }
 void KLT_gpu::execute_dbg(){
+    int w=3;
+    int h=3;
     
-    glUseProgram(dbg_sh_id);
+    //setup input texture
+    cv::Mat ip=cv::Mat::ones(h,w,CV_8UC1);
+    ip.convertTo(ip, CV_32FC1);
+    for(int r=0;r<h;r++){
+        for(int c=0;c<w;c++){
+            ip.at<float>(r,c) = r*10+c;
+        }
+    }
+    GLuint input_texture_id = loadFloatTexture(ip,
+                                               1,
+                                               w,
+                                               h);
+    
+    //setup output texture
     std::vector<GPGPUOutputTexture>outputs(2);
     for(int i=0;i<outputs.size();i++){
-        outputs[i].width = 5;
-        outputs[i].height = 5;
+        outputs[i].width = w;
+        outputs[i].height = h;
         outputs[i].num_components_per_element = 1;
         outputs[i].texture_id  = loadFloatTexture(cv::Mat(),
                                                   1,
@@ -52,6 +68,14 @@ void KLT_gpu::execute_dbg(){
     }
     outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
     outputs[1].color_attachment = GL_COLOR_ATTACHMENT1;
+    
+    glUseProgram(dbg_sh_id);
+    
+    //Hook up tex and sampler
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, input_texture_id);//bind texture
+    glUniform1i(dbg_sh_ip_texture_sampler, 0);//bind sampler
+
     
     runGPGPU(fbo_id,
              dbg_sh_vao_id,
