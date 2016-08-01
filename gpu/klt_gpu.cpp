@@ -201,11 +201,10 @@ void KLT_gpu::loadTexturesWithData(cv::Mat source,
                                    cv::Mat dest,
                                    std::vector<cv::Point2f>source_points,
                                    std::vector<cv::Point2f>prediction){
-    //dbg
-    std::cout << "Source points are -> " << std::endl;
-    for(int i=0;i<source_points.size();i++){
-        std::cout << source_points[i] << std::endl;
-    }
+//    std::cout << "Source points are -> " << std::endl;
+//    for(int i=0;i<source_points.size();i++){
+//        std::cout << source_points[i] << std::endl;
+//    }
     
     source.convertTo(source, CV_32FC1);
     dest.convertTo(dest, CV_32FC1);
@@ -377,31 +376,32 @@ void KLT_gpu::projectPointsToNextLevel(){
     
     //Update shader variables and input textures---
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, track_sh_prediction_output[ppong_idx_iterations].texture_id);
-    glUniform1i(next_level_sh_predpts_texture_sampler_id, 0);
+    glBindTexture(GL_TEXTURE_2D, next_sh_source_points_output[ppong_idx_pyramid_level].texture_id);
+    glUniform1i(next_level_sh_srcpts_texture_sampler_id, 0);
     
     glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, next_sh_source_points_output[ppong_idx_pyramid_level].texture_id);
-    glUniform1i(next_level_sh_srcpts_texture_sampler_id, 1);
+    glBindTexture(GL_TEXTURE_2D, track_sh_prediction_output[ppong_idx_iterations].texture_id);
+    glUniform1i(next_level_sh_predpts_texture_sampler_id, 1);
+    
     
     
     glUniform1i(next_level_sh_num_points_id, total_number_points_being_tracked);
     
     //Run shader
     std::vector<GPGPUOutputTexture>outputs(2);
-    outputs[0] = track_sh_prediction_output[(ppong_idx_iterations+1)%2];
+    outputs[0] = next_sh_source_points_output[(ppong_idx_pyramid_level+1)%2];
     outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
-    outputs[1] = next_sh_source_points_output[(ppong_idx_pyramid_level+1)%2];
+    outputs[1] = track_sh_prediction_output[(ppong_idx_iterations+1)%2];
     outputs[1].color_attachment = GL_COLOR_ATTACHMENT1;
-
+    
     
     runGPGPU(fbo_id, next_level_sh_vao_id, outputs);
     
     //Read back shader calculation for debug
-//    cv::Mat src_pts = readGPGPUOutputTexture(fbo_id, outputs[0]);
-//    cv::Mat prediction_pts = readGPGPUOutputTexture(fbo_id, outputs[1]);
-//    std::cout << "For next level, src_pts mat -> " << std::endl << src_pts << std::endl;
-//    std::cout << "For next level, prediction_pts mat -> " << std::endl << prediction_pts << std::endl;
-
+    cv::Mat src_pts = readGPGPUOutputTexture(fbo_id, outputs[0]);
+    //    cv::Mat prediction_pts = readGPGPUOutputTexture(fbo_id, outputs[1]);
+    //    std::cout << "For next level, src_pts mat -> " << std::endl << src_pts << std::endl;
+    //    std::cout << "For next level, prediction_pts mat -> " << std::endl << prediction_pts << std::endl;
+    
 }
 

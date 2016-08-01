@@ -36,8 +36,10 @@ int main(){
    cv::goodFeaturesToTrack(gray, input_corners, 10, 0.01, 10);
    cv::Mat ip_copy = gray.clone();
    cv::cvtColor(ip_copy, ip_copy, CV_GRAY2BGR);
+    std::cout << "Source points are -> " << std::endl;
    for(int i=0;i<input_corners.size();i++){
        cv::circle(ip_copy, input_corners[i], 2, cv::Scalar(0,255,0), cv::FILLED);
+       std::cout << input_corners[i] << std::endl;
    }
    cv::imshow("Input corners", ip_copy);
    //    cv::waitKey();
@@ -59,6 +61,13 @@ int main(){
    klt.execute(gray, dest_img, input_corners, tracked_corners, error);
 //    klt.execute_dbg();
    
+    //Run KLT on CPU----------------------
+//     std::cout << "CPU output -------------- " << std::endl;
+//     KLT_cpu klt_cpu(num_pyramid_levels,search_window_size);
+//     tracked_corners.clear();
+//     error.clear();
+//     klt_cpu.execute(gray, dest_img, input_corners, tracked_corners, error);
+    
    
    //Show output----------------
 //    cv::Mat output = dest_img.clone();
