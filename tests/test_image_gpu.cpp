@@ -86,6 +86,7 @@
      cv::Mat source=cv::Mat::zeros(200,200,CV_8UC1);
      cv::randu(source, 0, 255);
      cv::Mat dest = source.clone();
+     cv::randu(dest, 0, 255);
      //create synthetic corners---
      std::vector<cv::Point2f>input_corners(10);
      for(int i=0;i<10;i++){
@@ -100,11 +101,11 @@
      klt_gpu.execute(source, dest, input_corners, tracked_corners, error);
 //     klt.execute_dbg();
      
-//     std::cout << "CPU output -------------- " << std::endl;
-//     KLT_cpu klt_cpu(num_pyramid_levels,search_window_size);
-//     tracked_corners.clear();
-//     error.clear();
-//     klt_cpu.execute(source, dest, input_corners, tracked_corners, error);
+     std::cout << "CPU output -------------- " << std::endl;
+     KLT_cpu klt_cpu(num_pyramid_levels,search_window_size);
+     tracked_corners.clear();
+     error.clear();
+     klt_cpu.execute(source, dest, input_corners, tracked_corners, error);
 
 
  }

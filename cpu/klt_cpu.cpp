@@ -7,7 +7,7 @@ KLT_cpu::KLT_cpu(int num_pyramid_levels, int window_size){
 	assert(window_size%2!=0);
 	this->window_size = window_size;
     
-    num_iterations_kl_tracker = 20;
+    num_iterations_kl_tracker = 1;//20;
     min_displacement_exit_criterion_kl_tracker = 1e-4;
 }
 
@@ -73,6 +73,7 @@ std::vector<cv::Point2f> KLT_cpu::iterativeTrackerAtAPyramidLevel(cv::Mat source
             //Form matrix b---
             cv::Mat b;
             getb(source_points[i], prediction[i], source, dest, pyramid_level, b, W);
+//            std::cout << "b mat -> " << std::endl << b << std::endl;
             
             //Check if the point is trackable looking at eigen values of matrix to be inverted
             

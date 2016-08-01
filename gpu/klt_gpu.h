@@ -20,19 +20,26 @@ private:
                               std::vector<cv::Point2f>source_points,
                               std::vector<cv::Point2f>prediction);
     void calcA(int pyramid_level);
+    void calcb(int pyramid_level);
                               
     //Shader variables
-    GLuint source_image_id, dest_image_id, source_points_id, getA_shader_id;
+    GLuint source_image_id, dest_image_id, source_points_id;
     GLuint prediction_points_id[2];
-    GLuint getA_sh_srcimage_texture_sampler_id, getA_sh_srcpts_texture_sampler_id;
-    GLuint getA_sh_num_points_id, getA_sh_window_size_id, getA_sh_image_width_id, getA_sh_image_height_id, getA_sh_vao_id, getA_sh_vert_id;
+    //getA
+    GLuint getA_shader_id, getA_sh_srcimage_texture_sampler_id, getA_sh_srcpts_texture_sampler_id;
+    GLuint getA_sh_num_points_id, getA_sh_window_size_id, getA_sh_image_width_id, getA_sh_image_height_id, getA_sh_vao_id, getA_sh_vert_id, getA_sh_pyramid_level_id;
+    //getb
+    GLuint getb_shader_id, getb_sh_srcimage_texture_sampler_id, getb_sh_srcpts_texture_sampler_id;
+    GLuint getb_sh_num_points_id, getb_sh_window_size_id, getb_sh_image_width_id, getb_sh_image_height_id, getb_sh_vao_id, getb_sh_vert_id, getb_sh_dstimage_texture_sampler_id, getb_sh_predpts_texture_sampler_id, getb_sh_pyramid_level_id;
+    //dbgsh
+    GLuint dbg_sh_id, dbg_sh_vert_id, dbg_sh_vao_id, dbg_sh_ip_texture_sampler;    
     int texture_pairs_ppong;
     GLuint fbo_id;
-    GLuint dbg_sh_id, dbg_sh_vert_id, dbg_sh_vao_id, dbg_sh_ip_texture_sampler;
+
     
     //Output textures
     GPGPUOutputTexture getA_sh_Amat_output;
-    GPGPUOutputTexture getA_sh_W_output[2];
+    GPGPUOutputTexture getb_sh_bmat_output;
     
     
     int num_pyramid_levels, window_size;
