@@ -1,4 +1,5 @@
 #version 330 core
+precision highp float;
 
 //Uniforms
 uniform int num_points;
@@ -17,6 +18,8 @@ uniform sampler2D predpts_texture_sampler;
 //To calculate a mat for a particular point, you need to deserialize a particular column of b
 //a/w fills in one element in the a/b vec2 matrices
 layout(location=0) out float b;
+
+float EPS = 1e-5;
 
 //Returns the pixel value from source img at the pel specified at the pyramid level specified
 float getSourcePel(vec2 pel){
@@ -64,7 +67,7 @@ void main(){
     //convert row index to an (x,y) location within the window with source pel at center
     int half_window_size = window_size/2;
     int row_number = int(coord.y);
-    int window_x = int(mod(float(row_number), float(window_size))) - half_window_size;
+    int window_x = int(mod(float(row_number+EPS), float(window_size))) - half_window_size;
     int window_y = row_number/window_size - half_window_size;
     vec2 current_source_loc = source_corner + vec2(window_x, window_y);
     vec2 current_pred_loc = pred_corner + vec2(window_x, window_y);

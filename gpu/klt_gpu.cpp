@@ -6,7 +6,7 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size){
     this->window_size = window_size;
     
     //Constants
-    num_iterations_kl_tracker = 1;//20;
+    num_iterations_kl_tracker = 20;//20;
     min_displacement_exit_criterion_kl_tracker = 1e-4;
     
     //Shader stuff---

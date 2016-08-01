@@ -1,4 +1,5 @@
 #version 330 core
+precision highp float;
 
 //Uniforms
 uniform int num_points;
