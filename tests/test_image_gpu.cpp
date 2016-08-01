@@ -7,7 +7,7 @@
 #include <opencv2/opencv.hpp>
 
 
-#define num_pyramid_levels 1
+#define num_pyramid_levels 2
 #define search_window_size 3
 
 //int main(){

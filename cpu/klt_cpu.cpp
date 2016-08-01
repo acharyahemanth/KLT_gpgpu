@@ -7,7 +7,7 @@ KLT_cpu::KLT_cpu(int num_pyramid_levels, int window_size){
 	assert(window_size%2!=0);
 	this->window_size = window_size;
     
-    num_iterations_kl_tracker = 2;//20;
+    num_iterations_kl_tracker = 1;//20;
     min_displacement_exit_criterion_kl_tracker = 1e-4;
 }
 
@@ -36,6 +36,7 @@ void KLT_cpu::execute(cv::Mat source,
     
     //Start from topmost layer and calc optical flow for all pts
 	for(int l=num_pyramid_levels-1; l>=0; l--){
+        std::cout << "Processing pyr level " << l << " ..." << std::endl;
         tracked_pts = iterativeTrackerAtAPyramidLevel(source,
 										dest,
 										src_pts,
