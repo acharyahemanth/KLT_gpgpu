@@ -6,7 +6,7 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size){
     this->window_size = window_size;
     
     //Constants
-    num_iterations_kl_tracker = 1;//20;
+    num_iterations_kl_tracker = 2;//20;
     min_displacement_exit_criterion_kl_tracker = 1e-4;
     
     //Shader stuff---
@@ -191,8 +191,8 @@ void KLT_gpu::loadTexturesWithData(cv::Mat source,
     
     source.convertTo(source, CV_32FC1);
     dest.convertTo(dest, CV_32FC1);
-    source_image_id = loadFloatTexture(source, 1, source.cols, source.rows);
-    dest_image_id = loadFloatTexture(dest, 1, dest.cols, dest.rows);
+    source_image_id = loadFloatTexture(source, 1, source.cols, source.rows, GL_LINEAR);
+    dest_image_id = loadFloatTexture(dest, 1, dest.cols, dest.rows, GL_LINEAR);
     cv::Mat source_pts_mat = cv::Mat::zeros(1, source_points.size(), CV_32FC2);
     cv::Mat prediction_pts_mat = cv::Mat::zeros(1, prediction.size(), CV_32FC2);
     for(int i=0;i<source_points.size();i++){

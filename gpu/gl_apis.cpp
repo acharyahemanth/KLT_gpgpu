@@ -32,7 +32,8 @@ GLuint loadGrayTexture(cv::Mat input){
 }
 
 
-GLuint loadFloatTexture(cv::Mat ip, int num_components_per_element, int width, int height){
+GLuint loadFloatTexture(cv::Mat ip, int num_components_per_element, int width, int height,
+                        GLint texture_filter_method){
     GLenum internal_format, data_format;
     switch(num_components_per_element){
         case 1:
@@ -72,8 +73,8 @@ GLuint loadFloatTexture(cv::Mat ip, int num_components_per_element, int width, i
     }
 
     //setup up params for texture
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);    
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, texture_filter_method);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, texture_filter_method);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 

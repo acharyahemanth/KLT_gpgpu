@@ -7,7 +7,7 @@ KLT_cpu::KLT_cpu(int num_pyramid_levels, int window_size){
 	assert(window_size%2!=0);
 	this->window_size = window_size;
     
-    num_iterations_kl_tracker = 1;//20;
+    num_iterations_kl_tracker = 2;//20;
     min_displacement_exit_criterion_kl_tracker = 1e-4;
 }
 

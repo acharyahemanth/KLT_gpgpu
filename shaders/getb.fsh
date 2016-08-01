@@ -22,6 +22,7 @@ layout(location=0) out float b;
 float getSourcePel(vec2 pel){
     int shift = (1<<pyramid_level);
     vec2 pel_level0 = vec2(float(pel.x*shift), float(pel.y*shift)).xy;
+    pel_level0 = pel_level0 + vec2(0.5,0.5);
     vec2 tex_uv = vec2(float(pel_level0.x) / float(image_width),
                        float(pel_level0.y) / float(image_height)).xy;
     return texture(srcimage_texture_sampler, tex_uv).x;
@@ -31,6 +32,7 @@ float getSourcePel(vec2 pel){
 float getDestPel(vec2 pel){
     int shift = (1<<pyramid_level);
     vec2 pel_level0 = vec2(float(pel.x*shift), float(pel.y*shift)).xy;
+    pel_level0 = pel_level0 + vec2(0.5,0.5);    
     vec2 tex_uv = vec2(float(pel_level0.x) / float(image_width),
                        float(pel_level0.y) / float(image_height)).xy;
     return texture(dstimage_texture_sampler, tex_uv).x;
