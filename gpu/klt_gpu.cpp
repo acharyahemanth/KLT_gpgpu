@@ -42,6 +42,21 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size){
     getb_sh_vao_id = setupQuadVAO(getb_sh_vert_id);
 
     
+    //track.fsh
+    vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
+    fs = std::string(BASE_TEST_DIR) + "/shaders/track.fsh";
+    track_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
+    track_sh_vert_id = getAttribLocation(track_shader_id, "vert");
+    track_sh_A_texture_sampler_id = getUniformLocation(track_shader_id, "A_texture_sampler");
+    track_sh_b_texture_sampler_id = getUniformLocation(track_shader_id, "b_texture_sampler");
+    track_sh_predpts_texture_sampler_id = getUniformLocation(track_shader_id, "predpts_texture_sampler");
+    track_sh_num_points_id = getUniformLocation(track_shader_id, "num_points");
+    track_sh_window_size_id = getUniformLocation(track_shader_id, "window_size");
+    track_sh_image_width_id = getUniformLocation(track_shader_id, "image_width");
+    track_sh_image_height_id = getUniformLocation(track_shader_id, "image_height");
+    track_sh_pyramid_level_id = getUniformLocation(track_shader_id, "pyramid_level");
+    track_sh_vao_id = setupQuadVAO(track_sh_vert_id);
+    
     
     //dbgshader
 //    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
@@ -148,14 +163,20 @@ void KLT_gpu::iterativeTrackerAtAPyramidLevel(int pyramid_level){
         //Calculate the b matrix for all points---
         calcb(pyramid_level);
 
-//        //Calculate tracked point for all points---
-//        track();
-//
-//        //Check for points which have gone outside the current pyramid image---
-//
-//        //Copy prediction texture from output to input---
-    }
+        //Calculate tracked point for all points---
+        track(pyramid_level);
 
+        //Check if any more iterations are reqd---
+
+        //Swap ping pong buffers for next iteration---
+        texture_pairs_ppong = (texture_pairs_ppong+1)%2;
+        
+        //todo : Delete textures which get created in calcb : temp hack!
+        glDeleteTextures(1, &getb_sh_bmat_output.texture_id);
+    }
+    
+    //todo : Delete textures which get created in calcA : temp hack!
+    glDeleteTextures(1, &getA_sh_Amat_output.texture_id);
 }
 
 void KLT_gpu::loadTexturesWithData(cv::Mat source,
@@ -184,15 +205,15 @@ void KLT_gpu::loadTexturesWithData(cv::Mat source,
                                         2,
                                         source_points.size(),
                                         1);
-    prediction_points_id[texture_pairs_ppong] = loadFloatTexture(prediction_pts_mat,
-                                        2,
-                                        prediction.size(),
-                                        1);
-    prediction_points_id[(texture_pairs_ppong+1)%2] = loadFloatTexture(cv::Mat(),
-                                                                 2,
-                                                                 prediction.size(),
-                                                                 1);
-
+    for(int i=0;i<2;i++){
+        track_sh_prediction_output[i].width = prediction.size();
+        track_sh_prediction_output[i].height = 1;
+        track_sh_prediction_output[i].num_components_per_element = 2;
+        track_sh_prediction_output[i].texture_id = loadFloatTexture(prediction_pts_mat,
+                                                                    2,
+                                                                    prediction.size(),
+                                                                    1);
+    }
 }
 
 void KLT_gpu::calcA(int pyramid_level){
@@ -262,7 +283,7 @@ void KLT_gpu::calcb(int pyramid_level){
     glUniform1i(getb_sh_srcpts_texture_sampler_id, 2);
 
     glActiveTexture(GL_TEXTURE3);
-    glBindTexture(GL_TEXTURE_2D, prediction_points_id[texture_pairs_ppong]);
+    glBindTexture(GL_TEXTURE_2D, track_sh_prediction_output[texture_pairs_ppong].texture_id);
     glUniform1i(getb_sh_predpts_texture_sampler_id, 3);
     
     
@@ -277,13 +298,50 @@ void KLT_gpu::calcb(int pyramid_level){
     outputs[0] = getb_sh_bmat_output;
     outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
     
-    runGPGPU(fbo_id, getA_sh_vao_id, outputs);
+    runGPGPU(fbo_id, getb_sh_vao_id, outputs);
     
     //Read back shader calculation for debug
     cv::Mat b = readGPGPUOutputTexture(fbo_id, outputs[0]);
     std::cout << "b mat -> " << std::endl << b << std::endl;
 }
 
+void KLT_gpu::track(int pyramid_level){
+    //Use the track shader
+    glUseProgram(track_shader_id);
+    
+    //Setup output textures
+    
+    //Update shader variables and input textures---
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, track_sh_prediction_output[texture_pairs_ppong].texture_id);
+    glUniform1i(track_sh_predpts_texture_sampler_id, 0);
+
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, getA_sh_Amat_output.texture_id);
+    glUniform1i(track_sh_A_texture_sampler_id, 1);
+
+    glActiveTexture(GL_TEXTURE2);
+    glBindTexture(GL_TEXTURE_2D, getb_sh_bmat_output.texture_id);
+    glUniform1i(track_sh_b_texture_sampler_id, 2);
+
+    
+    glUniform1i(track_sh_num_points_id, total_number_points_being_tracked);
+    glUniform1i(track_sh_window_size_id, window_size);
+    glUniform1i(track_sh_image_width_id, source_image_width);
+    glUniform1i(track_sh_image_height_id, source_image_height);
+    glUniform1i(track_sh_pyramid_level_id, pyramid_level);
+    
+    //Run shader
+    std::vector<GPGPUOutputTexture>outputs(1);
+    outputs[0] = track_sh_prediction_output[(texture_pairs_ppong+1)%2];
+    outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
+    
+    runGPGPU(fbo_id, track_sh_vao_id, outputs);
+    
+    //Read back shader calculation for debug
+    cv::Mat track_pts = readGPGPUOutputTexture(fbo_id, outputs[0]);
+    std::cout << "track_pts mat -> " << std::endl << track_pts << std::endl;
+}
 
 
 

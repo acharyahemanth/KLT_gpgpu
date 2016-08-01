@@ -82,6 +82,7 @@ std::vector<cv::Point2f> KLT_cpu::iterativeTrackerAtAPyramidLevel(cv::Mat source
             prediction[i] = prediction[i] + cv::Point2f(tracked_pt);
             if(!isPointWithinImage(prediction[i], pyramid_level))
                 error[i] = true;
+            std::cout << "iteration " << k << " tracked pt : " << prediction[i] << std::endl;
             
             //Bail out if SAD > threshold : account for moving objects in scene
 

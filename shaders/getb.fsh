@@ -18,7 +18,7 @@ uniform sampler2D predpts_texture_sampler;
 //a/w fills in one element in the a/b vec2 matrices
 layout(location=0) out float b;
 
-//Returns the pixel value at the pel specified at the pyramid level specified
+//Returns the pixel value from source img at the pel specified at the pyramid level specified
 float getSourcePel(vec2 pel){
     int shift = (1<<pyramid_level);
     vec2 pel_level0 = vec2(float(pel.x*shift), float(pel.y*shift)).xy;
@@ -27,7 +27,7 @@ float getSourcePel(vec2 pel){
     return texture(srcimage_texture_sampler, tex_uv).x;
 }
 
-//Returns the pixel value at the pel specified at the pyramid level specified
+//Returns the pixel value from dest img at the pel specified at the pyramid level specified
 float getDestPel(vec2 pel){
     int shift = (1<<pyramid_level);
     vec2 pel_level0 = vec2(float(pel.x*shift), float(pel.y*shift)).xy;
@@ -52,7 +52,7 @@ void main(){
     //glFragcoord gives the center of the pixel, ie (0,0) -> (0.5, 0.5)
     vec2 coord = gl_FragCoord.xy - vec2(0.5,0.5);
     
-    //Current source corner
+    //Current source and corresponding prediction corners
     vec2 tex_uv = vec2(float(coord.x) / float(num_points),
                        0.0).xy;
     vec2 source_corner = texture(srcpts_texture_sampler, tex_uv).xy;
