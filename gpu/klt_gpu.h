@@ -23,6 +23,7 @@ private:
     void calcb(int pyramid_level);
     void track(int pyramid_level);
     void projectPointsToNextLevel();
+    void populateOutputDS(std::vector<cv::Point2f>&tracked_pts, std::vector<bool>&error);
                               
     //Shader variables
     GLuint source_image_id, dest_image_id;// source_points_id[2];

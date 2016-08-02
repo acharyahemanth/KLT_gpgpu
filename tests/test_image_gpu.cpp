@@ -48,7 +48,6 @@ int main(){
 	int window_width = 640;
 	int window_height = 480;
 	GLFWwindow* gl_window = setupGL(window_width,window_height,true);
-
 	char *gl_context_version = (char*)glGetString(GL_VERSION);
 	std::cout << "GL context version -> " << gl_context_version << std::endl;
 
@@ -70,15 +69,15 @@ int main(){
     
    
    //Show output----------------
-//    cv::Mat output = dest_img.clone();
-//    cv::cvtColor(output, output, CV_GRAY2BGR);
-//    std::cout << "Tracked corners are : " << std::endl;
-//    for(int i=0;i<tracked_corners.size();i++){
-//        cv::line(output, input_corners[i], tracked_corners[i], cv::Scalar(0,255,0));
-//        std::cout << input_corners[i] << "->" << tracked_corners[i] << std::endl;
-//    }
-//    cv::imshow("Tracked corners lines", output);
-//    cv::waitKey();
+    cv::Mat output = dest_img.clone();
+    cv::cvtColor(output, output, CV_GRAY2BGR);
+    std::cout << "Tracked corners are : " << std::endl;
+    for(int i=0;i<tracked_corners.size();i++){
+        cv::line(output, input_corners[i], tracked_corners[i], cv::Scalar(0,255,0));
+        std::cout << input_corners[i] << "->" << tracked_corners[i] << std::endl;
+    }
+    cv::imshow("Tracked corners lines", output);
+    cv::waitKey();
    
 }
 

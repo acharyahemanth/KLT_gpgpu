@@ -82,54 +82,6 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size){
 KLT_gpu::~KLT_gpu(){
     
 }
-void KLT_gpu::execute_dbg(){
-    int w=3;
-    int h=3;
-    
-    //setup input texture
-    cv::Mat ip=cv::Mat::ones(h,w,CV_8UC1);
-    ip.convertTo(ip, CV_32FC1);
-    for(int r=0;r<h;r++){
-        for(int c=0;c<w;c++){
-            ip.at<float>(r,c) = r*10+c;
-        }
-    }
-    GLuint input_texture_id = loadFloatTexture(ip,
-                                               1,
-                                               w,
-                                               h);
-    
-    //setup output texture
-    std::vector<GPGPUOutputTexture>outputs(2);
-    for(int i=0;i<outputs.size();i++){
-        outputs[i].width = w;
-        outputs[i].height = h;
-        outputs[i].num_components_per_element = 1;
-        outputs[i].texture_id  = loadFloatTexture(cv::Mat(),
-                                                  1,
-                                                  outputs[i].width,
-                                                  outputs[i].height);
-    }
-    outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
-    outputs[1].color_attachment = GL_COLOR_ATTACHMENT1;
-    
-    glUseProgram(dbg_sh_id);
-    
-    //Hook up tex and sampler
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, input_texture_id);//bind texture
-    glUniform1i(dbg_sh_ip_texture_sampler, 0);//bind sampler
-
-    
-    runGPGPU(fbo_id,
-             dbg_sh_vao_id,
-             outputs);
-    
-    cv::Mat a = readGPGPUOutputTexture(fbo_id, outputs[0]);
-    cv::Mat b = readGPGPUOutputTexture(fbo_id, outputs[1]);
-    std::cout << "GPGPU output 1 : " << std::endl << a << std::endl;
-    std::cout << "GPGPU output 2 : " << std::endl << b << std::endl;
-}
 
 void KLT_gpu::execute(cv::Mat source,
                       cv::Mat dest,
@@ -161,6 +113,11 @@ void KLT_gpu::execute(cv::Mat source,
         //Track points at current pyramid level
         iterativeTrackerAtAPyramidLevel(l);
         
+        //No need to project points to next level :: final result will be in ppong_idx_iterations
+        if(l==0){
+            break;
+        }
+        
         //project src_pts+tracked_pts to next level
         projectPointsToNextLevel();
         
@@ -168,6 +125,9 @@ void KLT_gpu::execute(cv::Mat source,
         ppong_idx_iterations = (ppong_idx_iterations+1)%2;
         ppong_idx_pyramid_level = (ppong_idx_pyramid_level+1)%2;
     }
+    
+    //Populate the output data structures---
+    populateOutputDS(tracked_pts, error);
 }
 
 void KLT_gpu::iterativeTrackerAtAPyramidLevel(int pyramid_level){
@@ -364,8 +324,8 @@ void KLT_gpu::track(int pyramid_level){
     runGPGPU(fbo_id, track_sh_vao_id, outputs);
     
     //Read back shader calculation for debug
-    cv::Mat track_pts = readGPGPUOutputTexture(fbo_id, outputs[0]);
-    std::cout << "track_pts mat -> " << std::endl << track_pts << std::endl;
+//    cv::Mat track_pts = readGPGPUOutputTexture(fbo_id, outputs[0]);
+//    std::cout << "track_pts mat -> " << std::endl << track_pts << std::endl;
 }
 
 void KLT_gpu::projectPointsToNextLevel(){
@@ -398,10 +358,77 @@ void KLT_gpu::projectPointsToNextLevel(){
     runGPGPU(fbo_id, next_level_sh_vao_id, outputs);
     
     //Read back shader calculation for debug
-    cv::Mat src_pts = readGPGPUOutputTexture(fbo_id, outputs[0]);
+//    cv::Mat src_pts = readGPGPUOutputTexture(fbo_id, outputs[0]);
     //    cv::Mat prediction_pts = readGPGPUOutputTexture(fbo_id, outputs[1]);
     //    std::cout << "For next level, src_pts mat -> " << std::endl << src_pts << std::endl;
     //    std::cout << "For next level, prediction_pts mat -> " << std::endl << prediction_pts << std::endl;
+}
+
+void KLT_gpu::populateOutputDS(std::vector<cv::Point2f> &tracked_pts, std::vector<bool> &error){
+    //Attach the final prediction buffer to fbo
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, track_sh_prediction_output[ppong_idx_iterations].texture_id, 0);
+    
+    //Read the tracked points from the final prediction texture
+    std::vector<GPGPUOutputTexture>outputs(1);
+    outputs[0] = track_sh_prediction_output[ppong_idx_iterations];
+    outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
+    cv::Mat track_pts_mat = readGPGPUOutputTexture(fbo_id, outputs[0]);
+    
+    tracked_pts.resize(track_pts_mat.cols);
+    error.resize(track_pts_mat.cols,false);//TODO : fix this later
+    for(int i=0;i<tracked_pts.size();i++){
+        tracked_pts[i].x = track_pts_mat.at<cv::Vec2f>(0,i).val[0];
+        tracked_pts[i].y = track_pts_mat.at<cv::Vec2f>(0,i).val[1];
+    }
     
 }
 
+void KLT_gpu::execute_dbg(){
+    int w=3;
+    int h=3;
+    
+    //setup input texture
+    cv::Mat ip=cv::Mat::ones(h,w,CV_8UC1);
+    ip.convertTo(ip, CV_32FC1);
+    for(int r=0;r<h;r++){
+        for(int c=0;c<w;c++){
+            ip.at<float>(r,c) = r*10+c;
+        }
+    }
+    GLuint input_texture_id = loadFloatTexture(ip,
+                                               1,
+                                               w,
+                                               h);
+    
+    //setup output texture
+    std::vector<GPGPUOutputTexture>outputs(2);
+    for(int i=0;i<outputs.size();i++){
+        outputs[i].width = w;
+        outputs[i].height = h;
+        outputs[i].num_components_per_element = 1;
+        outputs[i].texture_id  = loadFloatTexture(cv::Mat(),
+                                                  1,
+                                                  outputs[i].width,
+                                                  outputs[i].height);
+    }
+    outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
+    outputs[1].color_attachment = GL_COLOR_ATTACHMENT1;
+    
+    glUseProgram(dbg_sh_id);
+    
+    //Hook up tex and sampler
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, input_texture_id);//bind texture
+    glUniform1i(dbg_sh_ip_texture_sampler, 0);//bind sampler
+    
+    
+    runGPGPU(fbo_id,
+             dbg_sh_vao_id,
+             outputs);
+    
+    cv::Mat a = readGPGPUOutputTexture(fbo_id, outputs[0]);
+    cv::Mat b = readGPGPUOutputTexture(fbo_id, outputs[1]);
+    std::cout << "GPGPU output 1 : " << std::endl << a << std::endl;
+    std::cout << "GPGPU output 2 : " << std::endl << b << std::endl;
+}
