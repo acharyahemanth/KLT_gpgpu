@@ -17,3 +17,8 @@ target_link_libraries(test_klt_video cpu ${ROOT_LIBS})
 
 add_executable(test_klt_image_gpu test_image_gpu.cpp)
 target_link_libraries(test_klt_image_gpu cpu gpu ${ROOT_LIBS})
+
+add_executable(test_klt_video_gpu test_video_gpu.cpp)
+target_link_libraries(test_klt_video_gpu cpu gpu ${ROOT_LIBS})
+
+
