@@ -20,11 +20,14 @@ struct GPGPUOutputTexture{
 
 
 //Setup RGB texture---
-GLuint loadGrayTexture(cv::Mat input);
+GLuint createGrayTexture(cv::Mat input);
 
 //Setup float textures---
-GLuint loadFloatTexture(cv::Mat ip, int num_components_per_element, int width, int height,
+GLuint createFloatTexture(cv::Mat ip, int num_components_per_element, int width, int height,
                         GLint texture_filter_method=GL_NEAREST);
+
+//Load data into an exisiting texture---
+void loadTexture(GLuint texture_id, int x_offset, int y_offset, int width, int height, GLenum data_format, GLenum type, cv::Mat m);
 
 //Check for error ---
 void checkGLError(std::string func_name);

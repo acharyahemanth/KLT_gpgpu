@@ -1,6 +1,6 @@
 #include "gl_apis.h"
 
-GLuint loadGrayTexture(cv::Mat input){
+GLuint createGrayTexture(cv::Mat input){
     if(input.empty()){
         std::cout << "ERROR : loadRGBTexture() : Empty mat is passed!" << std::endl;
         return 0;
@@ -32,7 +32,7 @@ GLuint loadGrayTexture(cv::Mat input){
 }
 
 
-GLuint loadFloatTexture(cv::Mat ip, int num_components_per_element, int width, int height,
+GLuint createFloatTexture(cv::Mat ip, int num_components_per_element, int width, int height,
                         GLint texture_filter_method){
     GLenum internal_format, data_format;
     switch(num_components_per_element){
@@ -79,8 +79,25 @@ GLuint loadFloatTexture(cv::Mat ip, int num_components_per_element, int width, i
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     glBindTexture(GL_TEXTURE_2D,0);
-    checkGLError("initialiseFloatTextureWithCVMat");
+    checkGLError("createFloatTexture() ");
     return textureID;
+}
+
+//for float, data_format = GL_R,GL_RG,GL_RGB,GL_RGBA depending on # of components, type = GL_FLOAT
+//for rgb data, data_format = GL_RGB, type = GL_UNSIGNED_BYTE
+void loadTexture(GLuint texture_id, int x_offset, int y_offset, int width, int height, GLenum data_format, GLenum type, cv::Mat m){
+    glBindTexture(GL_TEXTURE_2D, texture_id);
+    glTexSubImage2D(GL_TEXTURE_2D,
+                    0,
+                    x_offset,
+                    y_offset,
+                    width,
+                    height,
+                    data_format,
+                    type,
+                    m.data);
+    glBindTexture(GL_TEXTURE_2D,0);
+    checkGLError("loadTexture() ");
 }
 
 GLuint setupFrameBuffer(){

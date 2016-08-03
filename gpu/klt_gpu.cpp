@@ -8,6 +8,7 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size){
     //Constants
     num_iterations_kl_tracker = 20;//20;
     min_displacement_exit_criterion_kl_tracker = 1e-4;
+    max_number_of_points_supported = 200;
     
     //Shader stuff---
     //getA.fsh
@@ -77,10 +78,55 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size){
     
     //Frame buffer that we will be rendering to---
     fbo_id = setupFrameBuffer();
+    
+    //Reserve space in the GPU for all textures---
+    setupTextures();
 
 }
 KLT_gpu::~KLT_gpu(){
+    glDeleteTextures(1, &getb_sh_bmat_output.texture_id);
+    glDeleteTextures(1, &getA_sh_Amat_output.texture_id);
+}
+
+void KLT_gpu::setupTextures(){
+    //output of getA.fsh
+    getA_sh_Amat_output.width = max_number_of_points_supported;
+    getA_sh_Amat_output.height = window_size*window_size;
+    getA_sh_Amat_output.num_components_per_element=2;
+    getA_sh_Amat_output.texture_id  = createFloatTexture(cv::Mat(),
+                                                       2,
+                                                       getA_sh_Amat_output.width,
+                                                       getA_sh_Amat_output.height);
     
+    //output of getb.fsh
+    getb_sh_bmat_output.width = max_number_of_points_supported;
+    getb_sh_bmat_output.height = window_size*window_size;
+    getb_sh_bmat_output.num_components_per_element=1;
+    getb_sh_bmat_output.texture_id  = createFloatTexture(cv::Mat(),
+                                                       getb_sh_bmat_output.num_components_per_element,
+                                                       getb_sh_bmat_output.width,
+                                                       getb_sh_bmat_output.height);
+    
+    //input / outputs
+    for(int i=0;i<2;i++){
+        next_sh_source_points_output[i].width = max_number_of_points_supported;
+        next_sh_source_points_output[i].height = 1;
+        next_sh_source_points_output[i].num_components_per_element = 2;
+        next_sh_source_points_output[i].texture_id = createFloatTexture(cv::Mat(),
+                                                                        2,
+                                                                        next_sh_source_points_output[i].width,
+                                                                        1);
+        
+        track_sh_prediction_output[i].width = max_number_of_points_supported;
+        track_sh_prediction_output[i].height = 1;
+        track_sh_prediction_output[i].num_components_per_element = 2;
+        track_sh_prediction_output[i].texture_id = createFloatTexture(cv::Mat(),
+                                                                      2,
+                                                                      track_sh_prediction_output[i].width,
+                                                                      1);
+    }
+
+
 }
 
 void KLT_gpu::execute(cv::Mat source,
@@ -96,7 +142,7 @@ void KLT_gpu::execute(cv::Mat source,
     for(int i=0;i<src_pts.size();i++){
         src_pts[i] = src_pts[i] / (1<<(num_pyramid_levels-1));
     }
-    total_number_points_being_tracked = src_pts.size();
+//    total_number_points_being_tracked = src_pts.size();
     
     //Load input data into textures---
     ppong_idx_iterations=0;
@@ -150,11 +196,11 @@ void KLT_gpu::iterativeTrackerAtAPyramidLevel(int pyramid_level){
         ppong_idx_iterations = (ppong_idx_iterations+1)%2;
         
         //todo : Delete textures which get created in calcb : temp hack!
-        glDeleteTextures(1, &getb_sh_bmat_output.texture_id);
+//        glDeleteTextures(1, &getb_sh_bmat_output.texture_id);
     }
     
     //todo : Delete textures which get created in calcA : temp hack!
-    glDeleteTextures(1, &getA_sh_Amat_output.texture_id);
+//    glDeleteTextures(1, &getA_sh_Amat_output.texture_id);
 }
 
 void KLT_gpu::loadTexturesWithData(cv::Mat source,
@@ -168,8 +214,8 @@ void KLT_gpu::loadTexturesWithData(cv::Mat source,
     
     source.convertTo(source, CV_32FC1);
     dest.convertTo(dest, CV_32FC1);
-    source_image_id = loadFloatTexture(source, 1, source.cols, source.rows, GL_LINEAR);
-    dest_image_id = loadFloatTexture(dest, 1, dest.cols, dest.rows, GL_LINEAR);
+    source_image_id = createFloatTexture(source, 1, source.cols, source.rows, GL_LINEAR);
+    dest_image_id = createFloatTexture(dest, 1, dest.cols, dest.rows, GL_LINEAR);
     cv::Mat source_pts_mat = cv::Mat::zeros(1, source_points.size(), CV_32FC2);
     cv::Mat prediction_pts_mat = cv::Mat::zeros(1, prediction.size(), CV_32FC2);
     for(int i=0;i<source_points.size();i++){
@@ -178,26 +224,23 @@ void KLT_gpu::loadTexturesWithData(cv::Mat source,
         prediction_pts_mat.at<cv::Vec2f>(0,i) = cv::Vec2f(prediction[i].x,
                                                       prediction[i].y);
     }
-//    source_points_id = loadFloatTexture(source_pts_mat,
-//                                        2,
-//                                        source_points.size(),
-//                                        1);
     for(int i=0;i<2;i++){
-        next_sh_source_points_output[i].width = source_points.size();
-        next_sh_source_points_output[i].height = 1;
-        next_sh_source_points_output[i].num_components_per_element = 2;
-        next_sh_source_points_output[i].texture_id = loadFloatTexture(source_pts_mat,
-                                                                    2,
-                                                                    source_points.size(),
-                                                                    1);
-        
-        track_sh_prediction_output[i].width = prediction.size();
-        track_sh_prediction_output[i].height = 1;
-        track_sh_prediction_output[i].num_components_per_element = 2;
-        track_sh_prediction_output[i].texture_id = loadFloatTexture(prediction_pts_mat,
-                                                                    2,
-                                                                    prediction.size(),
-                                                                    1);
+//        next_sh_source_points_output[i].width = source_points.size();
+//        next_sh_source_points_output[i].height = 1;
+//        next_sh_source_points_output[i].num_components_per_element = 2;
+//        next_sh_source_points_output[i].texture_id = createFloatTexture(source_pts_mat,
+//                                                                    2,
+//                                                                    source_points.size(),
+//                                                                    1);
+//        
+//        track_sh_prediction_output[i].width = prediction.size();
+//        track_sh_prediction_output[i].height = 1;
+//        track_sh_prediction_output[i].num_components_per_element = 2;
+//        track_sh_prediction_output[i].texture_id = createFloatTexture(prediction_pts_mat,
+//                                                                    2,
+//                                                                    prediction.size(),
+//                                                                    1);
+        loadTexture(next_sh_source_points_output[i].texture_id, <#int x_offset#>, <#int y_offset#>, <#int width#>, <#int height#>, <#GLenum data_format#>, <#GLenum type#>, <#cv::Mat m#>)
     }
 }
 
@@ -206,13 +249,6 @@ void KLT_gpu::calcA(int pyramid_level){
     glUseProgram(getA_shader_id);
     
     //Setup output textures
-    getA_sh_Amat_output.width = total_number_points_being_tracked;
-    getA_sh_Amat_output.height = window_size*window_size;
-    getA_sh_Amat_output.num_components_per_element=2;
-    getA_sh_Amat_output.texture_id  = loadFloatTexture(cv::Mat(),
-                                           2,
-                                           getA_sh_Amat_output.width,
-                                           getA_sh_Amat_output.height);
     
     //Update shader variables and input textures---
     glActiveTexture(GL_TEXTURE0);
@@ -223,7 +259,7 @@ void KLT_gpu::calcA(int pyramid_level){
     glBindTexture(GL_TEXTURE_2D, next_sh_source_points_output[ppong_idx_pyramid_level].texture_id);
     glUniform1i(getA_sh_srcpts_texture_sampler_id, 1);
     
-	glUniform1i(getA_sh_num_points_id, total_number_points_being_tracked);
+	glUniform1i(getA_sh_num_points_id, max_number_of_points_supported);
 	glUniform1i(getA_sh_window_size_id, window_size);
 	glUniform1i(getA_sh_image_width_id, source_image_width);
 	glUniform1i(getA_sh_image_height_id, source_image_height);
@@ -246,13 +282,6 @@ void KLT_gpu::calcb(int pyramid_level){
     glUseProgram(getb_shader_id);
     
     //Setup output textures
-    getb_sh_bmat_output.width = total_number_points_being_tracked;
-    getb_sh_bmat_output.height = window_size*window_size;
-    getb_sh_bmat_output.num_components_per_element=1;
-    getb_sh_bmat_output.texture_id  = loadFloatTexture(cv::Mat(),
-                                                       getb_sh_bmat_output.num_components_per_element,
-                                                       getb_sh_bmat_output.width,
-                                                       getb_sh_bmat_output.height);
     
     //Update shader variables and input textures---
     glActiveTexture(GL_TEXTURE0);
@@ -272,7 +301,7 @@ void KLT_gpu::calcb(int pyramid_level){
     glUniform1i(getb_sh_predpts_texture_sampler_id, 3);
     
     
-    glUniform1i(getb_sh_num_points_id, total_number_points_being_tracked);
+    glUniform1i(getb_sh_num_points_id, max_number_of_points_supported);
     glUniform1i(getb_sh_window_size_id, window_size);
     glUniform1i(getb_sh_image_width_id, source_image_width);
     glUniform1i(getb_sh_image_height_id, source_image_height);
@@ -310,7 +339,7 @@ void KLT_gpu::track(int pyramid_level){
     glUniform1i(track_sh_b_texture_sampler_id, 2);
 
     
-    glUniform1i(track_sh_num_points_id, total_number_points_being_tracked);
+    glUniform1i(track_sh_num_points_id, max_number_of_points_supported);
     glUniform1i(track_sh_window_size_id, window_size);
     glUniform1i(track_sh_image_width_id, source_image_width);
     glUniform1i(track_sh_image_height_id, source_image_height);
@@ -345,7 +374,7 @@ void KLT_gpu::projectPointsToNextLevel(){
     
     
     
-    glUniform1i(next_level_sh_num_points_id, total_number_points_being_tracked);
+    glUniform1i(next_level_sh_num_points_id, max_number_of_points_supported);
     
     //Run shader
     std::vector<GPGPUOutputTexture>outputs(2);
@@ -396,7 +425,7 @@ void KLT_gpu::execute_dbg(){
             ip.at<float>(r,c) = r*10+c;
         }
     }
-    GLuint input_texture_id = loadFloatTexture(ip,
+    GLuint input_texture_id = createFloatTexture(ip,
                                                1,
                                                w,
                                                h);
@@ -407,7 +436,7 @@ void KLT_gpu::execute_dbg(){
         outputs[i].width = w;
         outputs[i].height = h;
         outputs[i].num_components_per_element = 1;
-        outputs[i].texture_id  = loadFloatTexture(cv::Mat(),
+        outputs[i].texture_id  = createFloatTexture(cv::Mat(),
                                                   1,
                                                   outputs[i].width,
                                                   outputs[i].height);

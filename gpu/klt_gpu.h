@@ -24,6 +24,7 @@ private:
     void track(int pyramid_level);
     void projectPointsToNextLevel();
     void populateOutputDS(std::vector<cv::Point2f>&tracked_pts, std::vector<bool>&error);
+    void setupTextures();
                               
     //Shader variables
     GLuint source_image_id, dest_image_id;// source_points_id[2];
@@ -57,7 +58,7 @@ private:
     int num_iterations_kl_tracker;
     float min_displacement_exit_criterion_kl_tracker;
     int source_image_width, source_image_height;
-    int total_number_points_being_tracked;
+    int max_number_of_points_supported;
 };
 
 #endif
