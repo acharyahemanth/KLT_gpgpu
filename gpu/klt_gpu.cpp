@@ -93,7 +93,8 @@ KLT_gpu::~KLT_gpu(){
         glDeleteTextures(1,&next_sh_source_points_output[i].texture_id);
         glDeleteTextures(1,&track_sh_prediction_output[i].texture_id);
     }
-    
+    glDeleteTextures(1,&source_image_id);
+    glDeleteTextures(1,&dest_image_id);
 }
 
 void KLT_gpu::setupTextures(){
@@ -201,13 +202,7 @@ void KLT_gpu::iterativeTrackerAtAPyramidLevel(int pyramid_level){
 
         //Swap ping pong buffers for next iteration---
         ppong_idx_iterations = (ppong_idx_iterations+1)%2;
-        
-        //todo : Delete textures which get created in calcb : temp hack!
-//        glDeleteTextures(1, &getb_sh_bmat_output.texture_id);
     }
-    
-    //todo : Delete textures which get created in calcA : temp hack!
-//    glDeleteTextures(1, &getA_sh_Amat_output.texture_id);
 }
 
 void KLT_gpu::loadTexturesWithData(cv::Mat source,
@@ -216,8 +211,6 @@ void KLT_gpu::loadTexturesWithData(cv::Mat source,
                                    std::vector<cv::Point2f>prediction){
     source.convertTo(source, CV_32FC1);
     dest.convertTo(dest, CV_32FC1);
-//    source_image_id = createFloatTexture(source, 1, source.cols, source.rows, GL_LINEAR);
-//    dest_image_id = createFloatTexture(dest, 1, dest.cols, dest.rows, GL_LINEAR);
     loadTexture(source_image_id, 0, 0, source_image_width, source_image_height, GL_RED, GL_FLOAT, source);
     loadTexture(dest_image_id, 0, 0, source_image_width, source_image_height, GL_RED, GL_FLOAT, dest);
     cv::Mat source_pts_mat = cv::Mat::zeros(1, source_points.size(), CV_32FC2);
