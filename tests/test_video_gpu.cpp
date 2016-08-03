@@ -39,7 +39,7 @@ int main(){
     
     
     //Create KLT tracker component--------------------------------
-    KLT_gpu klt(num_pyramid_levels,search_window_size);
+    KLT_gpu klt(num_pyramid_levels,search_window_size,source_gray.cols, source_gray.rows);
 
 
     //Go through video, feed all frames through tracker----

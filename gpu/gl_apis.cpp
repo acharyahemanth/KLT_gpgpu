@@ -83,7 +83,7 @@ GLuint createFloatTexture(cv::Mat ip, int num_components_per_element, int width,
     return textureID;
 }
 
-//for float, data_format = GL_R,GL_RG,GL_RGB,GL_RGBA depending on # of components, type = GL_FLOAT
+//for float, data_format = GL_RED,GL_RG,GL_RGB,GL_RGBA depending on # of components, type = GL_FLOAT
 //for rgb data, data_format = GL_RGB, type = GL_UNSIGNED_BYTE
 void loadTexture(GLuint texture_id, int x_offset, int y_offset, int width, int height, GLenum data_format, GLenum type, cv::Mat m){
     glBindTexture(GL_TEXTURE_2D, texture_id);

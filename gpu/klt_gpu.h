@@ -5,7 +5,7 @@
 
 class KLT_gpu{
 public:
-    KLT_gpu(int num_pyramid_levels, int window_size);
+    KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int image_height);
     ~KLT_gpu();
     void execute(cv::Mat source,
                  cv::Mat dest,
@@ -58,7 +58,7 @@ private:
     int num_iterations_kl_tracker;
     float min_displacement_exit_criterion_kl_tracker;
     int source_image_width, source_image_height;
-    int max_number_of_points_supported;
+    int max_number_of_points_supported, total_number_points_being_tracked;
 };
 
 #endif
