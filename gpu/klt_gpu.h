@@ -58,7 +58,7 @@ private:
     int num_iterations_kl_tracker;
     float min_displacement_exit_criterion_kl_tracker;
     int source_image_width, source_image_height;
-    int max_number_of_points_supported, total_number_points_being_tracked;
+    int max_number_of_points_supported, total_number_points_being_tracked, margin_to_declare_tracking_lost;
 };
 
 #endif

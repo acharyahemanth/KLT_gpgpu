@@ -12,6 +12,7 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
     num_iterations_kl_tracker = 20;//20;
     min_displacement_exit_criterion_kl_tracker = 1e-4;
     max_number_of_points_supported = 200;
+    margin_to_declare_tracking_lost = 1;
     
     //Shader stuff---
     //getA.fsh
@@ -162,7 +163,7 @@ void KLT_gpu::execute(cv::Mat source,
     
     //Start from topmost layer and calc optical flow for all pts
     for(int l=num_pyramid_levels-1; l>=0; l--){
-        std::cout << "Processing pyr level " << l << " ..." << std::endl;
+//        std::cout << "Processing pyr level " << l << " ..." << std::endl;
         
         //Track points at current pyramid level
         iterativeTrackerAtAPyramidLevel(l);
@@ -191,7 +192,7 @@ void KLT_gpu::iterativeTrackerAtAPyramidLevel(int pyramid_level){
     
     //Go through iterations for all points---
     for(int k=0;k<num_iterations_kl_tracker;k++){
-        std::cout << "Processing iteration #" << k << std::endl;
+//        std::cout << "Processing iteration #" << k << std::endl;
         //Calculate the b matrix for all points---
         calcb(pyramid_level);
 
@@ -388,15 +389,24 @@ void KLT_gpu::populateOutputDS(std::vector<cv::Point2f> &tracked_pts, std::vecto
     outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
     cv::Mat track_pts_mat = readGPGPUOutputTexture(fbo_id, outputs[0]);
     
+    tracked_pts.clear();
+    error.clear();
     tracked_pts.resize(total_number_points_being_tracked);
     error.resize(total_number_points_being_tracked,false);//TODO : fix this later
     for(int i=0;i<tracked_pts.size();i++){
         tracked_pts[i].x = track_pts_mat.at<cv::Vec2f>(0,i).val[0];
         tracked_pts[i].y = track_pts_mat.at<cv::Vec2f>(0,i).val[1];
+        
+        if(tracked_pts[i].x < margin_to_declare_tracking_lost ||
+           tracked_pts[i].y < margin_to_declare_tracking_lost ||
+           tracked_pts[i].x >= source_image_width - margin_to_declare_tracking_lost ||
+           tracked_pts[i].y >= source_image_height - margin_to_declare_tracking_lost){
+            error[i] = true;
+        }
     }
     
 }
-
+//
 void KLT_gpu::execute_dbg(){
     int w=3;
     int h=3;
