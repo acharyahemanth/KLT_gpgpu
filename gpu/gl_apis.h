@@ -1,7 +1,7 @@
 #ifndef GL_APIS_H
 #define GL_APIS_H
 
-#include "misc_headers.h"
+#include "../common/misc_headers.h"
 #include <string>
 #include <vector>
 #include <iostream>

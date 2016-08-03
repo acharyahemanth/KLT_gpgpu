@@ -289,7 +289,8 @@ void runGPGPU(GLuint fbo, GLuint vao, std::vector<GPGPUOutputTexture>output_text
     int smallest_output_texture_width = output_textures[0].width;
     int smallest_output_texture_height = output_textures[0].height;
     for(int i=0;i<output_textures.size();i++){
-        glFramebufferTexture(GL_FRAMEBUFFER, output_textures[i].color_attachment, output_textures[i].texture_id, 0);
+        glFramebufferTexture2D(GL_FRAMEBUFFER, output_textures[i].color_attachment, GL_TEXTURE_2D,
+                               output_textures[i].texture_id, 0);
         DrawBuffers[i] = output_textures[i].color_attachment;
         if(output_textures[i].width < smallest_output_texture_width)
             smallest_output_texture_width = output_textures[i].width;
@@ -402,7 +403,7 @@ void checkGLError(
             printf("GL_INVALID_FRAMEBUFFER_OPERATION: framebuffer object is not complete");
             //std::cout << "GL_INVALID_FRAMEBUFFER_OPERATION: framebuffer object is not complete" << std::endl;
             break;
-            
+#ifndef TARGET_IS_ANDROID
         case GL_STACK_OVERFLOW:
             std::cout << "GL_STACK_OVERFLOW: "
             "command would cause a stack overflow" << std::endl;
@@ -412,7 +413,7 @@ void checkGLError(
             std::cout << "GL_STACK_UNDERFLOW: "
             "command would cause a stack underflow" << std::endl;
             break;
-            
+#endif
         case GL_OUT_OF_MEMORY:
             std::cout << "GL_OUT_OF_MEMORY: "
             "not enough memory left to execute command" << std::endl;

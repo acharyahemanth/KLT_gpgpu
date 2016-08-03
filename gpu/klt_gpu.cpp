@@ -381,8 +381,11 @@ void KLT_gpu::projectPointsToNextLevel(){
 void KLT_gpu::populateOutputDS(std::vector<cv::Point2f> &tracked_pts, std::vector<bool> &error){
     //Attach the final prediction buffer to fbo
     glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
-    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, track_sh_prediction_output[ppong_idx_iterations].texture_id, 0);
-    
+//    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, track_sh_prediction_output[ppong_idx_iterations].texture_id, 0);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                           track_sh_prediction_output[ppong_idx_iterations].texture_id, 0);
+
+
     //Read the tracked points from the final prediction texture
     std::vector<GPGPUOutputTexture>outputs(1);
     outputs[0] = track_sh_prediction_output[ppong_idx_iterations];

@@ -1,7 +1,7 @@
 #ifndef BASEGPGPU
 #define BASEGPGPU
 
-#include "misc_headers.h"
+#include "../common/misc_headers.h"
 
 class BaseGPGPU{
 public:
