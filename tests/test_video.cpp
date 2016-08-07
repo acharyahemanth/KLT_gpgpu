@@ -4,9 +4,16 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/videoio.hpp>
 #include <opencv2/opencv.hpp>
+#include <sys/time.h>
 
 #define num_pyramid_levels 3
 #define search_window_size 7
+
+long long unsigned currentTimeInMilliseconds() {
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return ((tv.tv_sec * 1000) + (tv.tv_usec / 1000));
+}
 
 int main(){
     cv::VideoCapture  source_video = cv::VideoCapture(std::string(BASE_TEST_DIR) + "/tests/test_video.mp4");
@@ -48,7 +55,10 @@ int main(){
         cv::resize(query_frame, query_small, smallimg.size());
         cv::cvtColor(query_small, query_gray, CV_BGR2GRAY);
 
+        long long unsigned start = currentTimeInMilliseconds();
         klt.execute(prev_image, query_gray, input_corners, tracked_corners, error);
+//        klt.execute_ocv(prev_image, query_gray, input_corners, tracked_corners, error);
+        std::cout << "Exec time : " << (int)(currentTimeInMilliseconds() - start) << std::endl;
 
         input_corners.clear();
         for(int i=0;i<tracked_corners.size();i++){

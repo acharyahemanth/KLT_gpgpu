@@ -3,6 +3,9 @@
 
 #include "misc_headers.h"
 #include <vector>
+#include <opencv2/features2d.hpp>
+#include <opencv2/videoio.hpp>
+#include <opencv2/opencv.hpp>
 
 
 class KLT_cpu{
@@ -14,6 +17,12 @@ public:
 			     std::vector<cv::Point2f>src_pts,
 			     std::vector<cv::Point2f>&tracked_pts,
 			     std::vector<bool>&error);
+    void execute_ocv(cv::Mat source,
+                 cv::Mat dest,
+                 std::vector<cv::Point2f>src_pts,
+                 std::vector<cv::Point2f>&tracked_pts,
+                 std::vector<bool>&error);
+    
 private:
 	std::vector<cv::Point2f> iterativeTrackerAtAPyramidLevel(cv::Mat source,
 										 cv::Mat dest,

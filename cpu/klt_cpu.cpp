@@ -248,3 +248,30 @@ int KLT_cpu::getPel(cv::Mat img, float x, float y, int pyramid_level){
     int pel = blt(img, x_level_0, y_level_0);
     return pel;
 }
+
+void KLT_cpu::execute_ocv(cv::Mat source,
+                 cv::Mat dest,
+                 std::vector<cv::Point2f>src_pts,
+                 std::vector<cv::Point2f>&tracked_pts,
+                 std::vector<bool>&error){
+    tracked_pts.clear();
+    error.clear();
+    
+    std::vector<unsigned char>status;
+    cv::Mat err_mat;
+    tracked_pts.resize(src_pts.size());
+    error.resize(src_pts.size(),true);
+    cv::calcOpticalFlowPyrLK(source,
+                             dest,
+                             src_pts,
+                             tracked_pts,
+                             status,
+                             err_mat,
+                             cv::Size(window_size,window_size),
+                             num_pyramid_levels);
+    for(int i=0;i<src_pts.size();i++){
+        if(status[i])
+            error[i] = false;
+    }
+}
+
