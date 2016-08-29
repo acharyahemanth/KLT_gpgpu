@@ -2,6 +2,7 @@
 #define GL_APIS_H
 
 #include "../common/misc_headers.h"
+#include "../common/mylog.h"
 #include <string>
 #include <vector>
 #include <iostream>

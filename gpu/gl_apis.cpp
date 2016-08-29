@@ -150,6 +150,7 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
     FragmentShaderCode += temp_shader;
 
 #else
+    //On Android, need to read in shader from the Asset Folder...
     std::string VertexShaderCode, FragmentShaderCode, temp_shader;
     VertexShaderCode += SHADER_HEADER;
     FragmentShaderCode += SHADER_HEADER;
