@@ -28,7 +28,7 @@ GLFWwindow* createContext(int window_width, int window_height, bool off_screen){
 
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "GL_window", NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, "GL_window", NULL, NULL);
     if (!window)
     {
     	std::cout << "Unable to create window..." << std::endl;

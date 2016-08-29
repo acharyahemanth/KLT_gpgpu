@@ -39,8 +39,8 @@ int main(){
     
     //Create window and setup GL context---
     int window_width = 640;
-    int window_height = 480;
-    GLFWwindow* gl_window = setupGL(window_width,window_height,true);
+    int window_height = 360;
+    GLFWwindow* gl_window = setupGL(window_width,window_height,false);
     char *gl_context_version = (char*)glGetString(GL_VERSION);
     std::cout << "GL context version -> " << gl_context_version << std::endl;
 
@@ -66,6 +66,7 @@ int main(){
 
         long long unsigned start = currentTimeInMilliseconds();
         klt.execute(prev_image, query_gray, input_corners, tracked_corners, error);
+        klt.drawFrame(query_small);
         std::cout << "Exec time : " << (int)(currentTimeInMilliseconds() - start) << std::endl;
 
         input_corners.clear();
@@ -81,6 +82,8 @@ int main(){
         frame_ctr++;
         cv::imshow("tracked corners", query_small);
         cv::waitKey(1);
+
+        glfwSwapBuffers(gl_window);
     }while(1);
 
 }

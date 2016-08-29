@@ -29,8 +29,11 @@ struct GPGPUOutputTexture{
 };
 
 
-//Setup RGB texture---
+//Setup Gray texture---
 GLuint createGrayTexture(cv::Mat input);
+
+//Setup RGB texture---
+GLuint createRGBTexture(int w, int h);
 
 //Setup float textures---
 GLuint createFloatTexture(cv::Mat ip, int num_components_per_element, int width, int height,
@@ -52,5 +55,8 @@ GLuint setupFrameBuffer();
 GLuint setupQuadVAO(GLuint vert_attribute_id);
 void runGPGPU(GLuint fbo, GLuint vao, std::vector<GPGPUOutputTexture>output_textures);
 cv::Mat readGPGPUOutputTexture(GLuint fbo, GPGPUOutputTexture t);
+
+//Render to screen
+void renderToScreen(GLuint vao, int w, int h);
 
 #endif

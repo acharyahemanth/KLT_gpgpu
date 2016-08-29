@@ -16,7 +16,6 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
     
     //Shader stuff---
     //getA.fsh
-    myLOGD("About to compile gpgpu_quad.vsh and getA.fsh ...");
     std::string vs = std::string(BASE_TEST_DIR) + "shaders/gpgpu_quad.vsh";
     std::string fs = std::string(BASE_TEST_DIR) + "shaders/getA.fsh";
     getA_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
@@ -71,6 +70,18 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
     next_level_sh_predpts_texture_sampler_id = getUniformLocation(next_level_shader_id, "predpts_texture_sampler");
     next_level_sh_num_points_id = getUniformLocation(next_level_shader_id, "num_points");
     next_level_sh_vao_id = setupQuadVAO(next_level_sh_vert_id);
+    
+    
+    //back_image_shader
+    vs = std::string(BASE_TEST_DIR) + "shaders/gpgpu_quad.vsh";
+    fs = std::string(BASE_TEST_DIR) + "shaders/back_image.fsh";
+    back_image_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
+    back_image_sh_vert_id = getAttribLocation(back_image_shader_id, "vert");
+    back_image_sh_srcimage_texture_sampler_id = getUniformLocation(back_image_shader_id, "srcimage_texture_sampler");
+    back_image_sh_image_width_id = getUniformLocation(back_image_shader_id, "image_width");
+    back_image_sh_image_height_id = getUniformLocation(back_image_shader_id, "image_height");
+    back_image_sh_vao_id = setupQuadVAO(back_image_sh_vert_id);
+
     
     //dbgshader
 //    std::string vs = std::string(BASE_TEST_DIR) + "shaders/gpgpu_quad.vsh";
@@ -138,6 +149,9 @@ void KLT_gpu::setupTextures(){
     //input images
     source_image_id = createFloatTexture(cv::Mat(), 1, source_image_width, source_image_height, GL_LINEAR);
     dest_image_id = createFloatTexture(cv::Mat(), 1, source_image_width, source_image_height, GL_LINEAR);
+    
+    //display back buffer
+    back_image_id = createRGBTexture(source_image_width, source_image_height);
 }
 
 void KLT_gpu::execute(cv::Mat source,
@@ -456,4 +470,31 @@ void KLT_gpu::execute_dbg(){
     cv::Mat b = readGPGPUOutputTexture(fbo_id, outputs[1]);
     std::cout << "GPGPU output 1 : " << std::endl << a << std::endl;
     std::cout << "GPGPU output 2 : " << std::endl << b << std::endl;
+}
+
+void KLT_gpu::drawFrame(cv::Mat img){
+    //Use the back_image shader
+    glUseProgram(back_image_shader_id);
+    
+    //Load input image into texture
+    loadTexture(back_image_id,
+                0,
+                0,
+                source_image_width,
+                source_image_height,
+                GL_RGB,
+                GL_UNSIGNED_BYTE,
+                img);
+    
+    //Update shader variables and input textures---
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, back_image_id);
+    glUniform1i(back_image_sh_srcimage_texture_sampler_id, 0);
+    
+        
+    glUniform1i(back_image_sh_image_width_id, source_image_width);
+    glUniform1i(back_image_sh_image_height_id, source_image_height);
+    
+    //Run shader
+    renderToScreen(back_image_sh_vao_id, source_image_width, source_image_height);
 }

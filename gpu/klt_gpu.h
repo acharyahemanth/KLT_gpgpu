@@ -14,6 +14,7 @@ public:
                  std::vector<cv::Point2f>&tracked_pts,
                  std::vector<bool>&error);
     void execute_dbg();
+    void drawFrame(cv::Mat img);
 private:
     void iterativeTrackerAtAPyramidLevel(int pyramid_level);
     void loadTexturesWithData(cv::Mat source,
@@ -28,7 +29,7 @@ private:
     void setupTextures();
                               
     //Shader variables
-    GLuint source_image_id, dest_image_id;// source_points_id[2];
+    GLuint source_image_id, dest_image_id, back_image_id;// source_points_id[2];
 //    GLuint prediction_points_id[2];
     //getA
     GLuint getA_shader_id, getA_sh_srcimage_texture_sampler_id, getA_sh_srcpts_texture_sampler_id;
@@ -42,6 +43,8 @@ private:
     //next_level
     GLuint next_level_shader_id, next_level_sh_srcpts_texture_sampler_id, next_level_sh_predpts_texture_sampler_id, next_level_sh_vao_id, next_level_sh_num_points_id,
     next_level_sh_vert_id;
+    //back_image
+    GLuint back_image_shader_id, back_image_sh_vert_id, back_image_sh_srcimage_texture_sampler_id, back_image_sh_image_width_id, back_image_sh_image_height_id, back_image_sh_vao_id;
     
     //dbgsh
     GLuint dbg_sh_id, dbg_sh_vert_id, dbg_sh_vao_id, dbg_sh_ip_texture_sampler;    

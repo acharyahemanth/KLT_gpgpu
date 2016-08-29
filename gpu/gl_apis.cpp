@@ -88,6 +88,23 @@ GLuint createFloatTexture(cv::Mat ip, int num_components_per_element, int width,
     return textureID;
 }
 
+GLuint createRGBTexture(int w, int h){
+
+    // Create one OpenGL texture
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    
+    // Give the image to OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, w, h, 0, GL_BGR, GL_UNSIGNED_BYTE, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    
+    return textureID;
+}
+
+
+
 //for float, data_format = GL_RED,GL_RG,GL_RGB,GL_RGBA depending on # of components, type = GL_FLOAT
 //for rgb data, data_format = GL_RGB, type = GL_UNSIGNED_BYTE
 void loadTexture(GLuint texture_id, int x_offset, int y_offset, int width, int height, GLenum data_format, GLenum type, cv::Mat m){
@@ -353,6 +370,29 @@ void runGPGPU(GLuint fbo, GLuint vao, std::vector<GPGPUOutputTexture>output_text
     // Swap buffers
     // glfwSwapBuffers(gl_window);
     
+}
+
+void renderToScreen(GLuint vao, int w, int h){
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    
+    //Render black
+    glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+    
+    //Setup viewport to smallest texture
+    glViewport(0,0,w,h);
+    
+    // Clear the screen
+    glClear( GL_COLOR_BUFFER_BIT );
+    
+    //Load the VAO
+    glBindVertexArray(vao);
+    
+    // Draw the quad
+    glDrawArrays(GL_TRIANGLES, 0, 2*3);
+    
+    //Unbind the VAO
+    glBindVertexArray(0);
+
 }
 
 cv::Mat readGPGPUOutputTexture(GLuint fbo, GPGPUOutputTexture t){
