@@ -7,6 +7,7 @@ include $(CLEAR_VARS)
 include $(OPENCV_PATH)/OpenCV.mk
 LOCAL_MODULE            := klt_gpgpu
 LOCAL_STATIC_LIBRARIES  += gpu
+LOCAL_EXPORT_C_INCLUDES += $(KLT_GPGPU_LOCAL_PATH)/common
 include $(BUILD_STATIC_LIBRARY)
 
 include $(KLT_GPGPU_LOCAL_PATH)/gpu/Android.mk
