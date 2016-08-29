@@ -96,7 +96,7 @@ GLuint createRGBTexture(int w, int h){
     glBindTexture(GL_TEXTURE_2D, textureID);
     
     // Give the image to OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, w, h, 0, GL_BGR, GL_UNSIGNED_BYTE, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0,GL_RGB, w, h, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     
@@ -382,7 +382,7 @@ void renderToScreen(GLuint vao, int w, int h){
     glViewport(0,0,w,h);
     
     // Clear the screen
-    glClear( GL_COLOR_BUFFER_BIT );
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     
     //Load the VAO
     glBindVertexArray(vao);

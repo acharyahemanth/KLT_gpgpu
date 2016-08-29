@@ -496,5 +496,6 @@ void KLT_gpu::drawFrame(cv::Mat img){
     glUniform1i(back_image_sh_image_height_id, source_image_height);
     
     //Run shader
+    myLOGD("rendering to screen");
     renderToScreen(back_image_sh_vao_id, source_image_width, source_image_height);
 }
