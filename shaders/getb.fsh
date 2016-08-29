@@ -1,4 +1,3 @@
-#version 330 core
 precision highp float;
 
 //Uniforms
@@ -23,8 +22,8 @@ float EPS = 1e-5;
 
 //Returns the pixel value from source img at the pel specified at the pyramid level specified
 float getSourcePel(vec2 pel){
-    int shift = (1<<pyramid_level);
-    vec2 pel_level0 = vec2(float(pel.x*shift), float(pel.y*shift)).xy;
+    float shift = float(1<<pyramid_level);
+    vec2 pel_level0 = vec2(pel.x*shift, pel.y*shift).xy;
     pel_level0 = pel_level0 + vec2(0.5,0.5);
     vec2 tex_uv = vec2(float(pel_level0.x) / float(image_width),
                        float(pel_level0.y) / float(image_height)).xy;
@@ -33,8 +32,8 @@ float getSourcePel(vec2 pel){
 
 //Returns the pixel value from dest img at the pel specified at the pyramid level specified
 float getDestPel(vec2 pel){
-    int shift = (1<<pyramid_level);
-    vec2 pel_level0 = vec2(float(pel.x*shift), float(pel.y*shift)).xy;
+    float shift = float(1<<pyramid_level);
+    vec2 pel_level0 = vec2(pel.x*shift, pel.y*shift).xy;
     pel_level0 = pel_level0 + vec2(0.5,0.5);
     vec2 tex_uv = vec2(float(pel_level0.x) / float(image_width),
                        float(pel_level0.y) / float(image_height)).xy;
@@ -67,7 +66,7 @@ void main(){
     //convert row index to an (x,y) location within the window with source pel at center
     int half_window_size = window_size/2;
     int row_number = int(coord.y);
-    int window_x = int(mod(float(row_number+EPS), float(window_size))) - half_window_size;
+    int window_x = int(mod(float(row_number)+EPS, float(window_size))) - half_window_size;
     int window_y = row_number/window_size - half_window_size;
     vec2 current_source_loc = source_corner + vec2(window_x, window_y);
     vec2 current_pred_loc = pred_corner + vec2(window_x, window_y);

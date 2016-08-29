@@ -1,4 +1,3 @@
-#version 330 core
 precision highp float;
 
 //Uniforms
@@ -32,7 +31,7 @@ void main(){
     //Go through all rows of current point, assemble the elements of A_t*A and A_t*b matrices
     float ata_00, ata_01, ata_11;
     float atb_00, atb_10;
-    ata_00 = ata_01 = ata_11 = atb_00 = atb_10 = 0;
+    ata_00 = ata_01 = ata_11 = atb_00 = atb_10 = 0.0;
     vec2 tex_uv, a_i, b_i;
     int num_rows = window_size*window_size;
     for(int r=0; r<num_rows; r++){

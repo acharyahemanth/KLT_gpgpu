@@ -10,6 +10,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#ifndef TARGET_IS_ANDROID
+#   define SHADER_HEADER \
+        "#version 330 core\n"
+#else
+#   define SHADER_HEADER \
+        "#version 300 es \n"
+#endif
+
+
 struct GPGPUOutputTexture{
     GLuint texture_id;
     GLenum color_attachment;

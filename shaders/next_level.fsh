@@ -1,4 +1,3 @@
-#version 330 core
 precision highp float;
 
 //Uniforms
@@ -24,7 +23,7 @@ void main(){
     vec2 curr_pred_corner = texture(predpts_texture_sampler, tex_uv).xy;
     
     //Multiply by 2 to project to next level
-    src_next = 2*curr_source_corner;
-    pred_next = 2*curr_pred_corner;
+    src_next = 2.0*curr_source_corner;
+    pred_next = 2.0*curr_pred_corner;
     
 }

@@ -1,5 +1,10 @@
 #include "gl_apis.h"
 
+#ifdef TARGET_IS_ANDROID
+#include "ShaderReader.h"
+extern ShaderReader *shader_reader;
+#endif
+
 GLuint createGrayTexture(cv::Mat input){
     if(input.empty()){
         std::cout << "ERROR : loadRGBTexture() : Empty mat is passed!" << std::endl;
@@ -115,35 +120,57 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
     GLuint FragmentShaderID = glCreateShader(GL_FRAGMENT_SHADER);
 
     // Read the Vertex Shader code from the file
-    std::string VertexShaderCode;
+#ifndef TARGET_IS_ANDROID
+    std::string VertexShaderCode, temp_shader="";
     std::ifstream VertexShaderStream(vertex_file_path, std::ios::in);
+    VertexShaderCode += SHADER_HEADER;
     if(VertexShaderStream.is_open()){
         std::string Line = "";
         while(getline(VertexShaderStream, Line))
-            VertexShaderCode += "\n" + Line;
+            temp_shader += "\n" + Line;
         VertexShaderStream.close();
     }else{
-        printf("Impossible to open %s. Are you in the right directory ? Don't forget to read the FAQ !\n", vertex_file_path);
+        myLOGD("Impossible to open %s. Are you in the right directory ? Don't forget to read the FAQ !\n", vertex_file_path);
         getchar();
         return 0;
     }
+    VertexShaderCode += temp_shader;
 
     // Read the Fragment Shader code from the file
     std::string FragmentShaderCode;
     std::ifstream FragmentShaderStream(fragment_file_path, std::ios::in);
+    FragmentShaderCode += SHADER_HEADER;
+    temp_shader="";
     if(FragmentShaderStream.is_open()){
         std::string Line = "";
         while(getline(FragmentShaderStream, Line))
-            FragmentShaderCode += "\n" + Line;
+            temp_shader += "\n" + Line;
         FragmentShaderStream.close();
     }
+    FragmentShaderCode += temp_shader;
+
+#else
+    std::string VertexShaderCode, FragmentShaderCode, temp_shader;
+    VertexShaderCode += SHADER_HEADER;
+    FragmentShaderCode += SHADER_HEADER;
+    bool vsh_result = shader_reader->getShader(vertex_file_path, temp_shader);
+    VertexShaderCode += temp_shader;
+    bool fsh_result = shader_reader->getShader(fragment_file_path, temp_shader);
+    FragmentShaderCode += temp_shader;
+    if(!vsh_result || !fsh_result){
+        myLOGE("LoadShaders() : Error in reading shader!!!");
+        return 0;
+    }
+//    myLOGD("%s ->\n %s",vertex_file_path, VertexShaderCode.c_str());
+//    myLOGD("%s ->\n %s",fragment_file_path, FragmentShaderCode.c_str());
+#endif
 
     GLint Result = GL_FALSE;
     int InfoLogLength;
 
 
     // Compile Vertex Shader
-    printf("Compiling shader : %s\n", vertex_file_path);
+    myLOGD("Compiling shader : %s\n", vertex_file_path);
     char const * VertexSourcePointer = VertexShaderCode.c_str();
     glShaderSource(VertexShaderID, 1, &VertexSourcePointer , NULL);
     glCompileShader(VertexShaderID);
@@ -154,13 +181,13 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
     if ( InfoLogLength > 0 ){
         std::vector<char> VertexShaderErrorMessage(InfoLogLength+1);
         glGetShaderInfoLog(VertexShaderID, InfoLogLength, NULL, &VertexShaderErrorMessage[0]);
-        printf("%s\n", &VertexShaderErrorMessage[0]);
+        myLOGD("%s\n", &VertexShaderErrorMessage[0]);
     }
 
 
 
     // Compile Fragment Shader
-    printf("Compiling shader : %s\n", fragment_file_path);
+    myLOGD("Compiling shader : %s\n", fragment_file_path);
     char const * FragmentSourcePointer = FragmentShaderCode.c_str();
     glShaderSource(FragmentShaderID, 1, &FragmentSourcePointer , NULL);
     glCompileShader(FragmentShaderID);
@@ -171,13 +198,13 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
     if ( InfoLogLength > 0 ){
         std::vector<char> FragmentShaderErrorMessage(InfoLogLength+1);
         glGetShaderInfoLog(FragmentShaderID, InfoLogLength, NULL, &FragmentShaderErrorMessage[0]);
-        printf("%s\n", &FragmentShaderErrorMessage[0]);
+        myLOGD("%s\n", &FragmentShaderErrorMessage[0]);
     }
 
 
 
     // Link the program
-    printf("Linking program\n");
+    myLOGD("Linking program\n");
     GLuint ProgramID = glCreateProgram();
     glAttachShader(ProgramID, VertexShaderID);
     glAttachShader(ProgramID, FragmentShaderID);
@@ -189,7 +216,7 @@ GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path
     if ( InfoLogLength > 0 ){
         std::vector<char> ProgramErrorMessage(InfoLogLength+1);
         glGetProgramInfoLog(ProgramID, InfoLogLength, NULL, &ProgramErrorMessage[0]);
-        printf("%s\n", &ProgramErrorMessage[0]);
+        myLOGD("%s\n", &ProgramErrorMessage[0]);
     }
 
     
@@ -206,7 +233,7 @@ GLint getUniformLocation(GLuint program_ID, std::string unif_name) {
 
 	GLint loc = glGetUniformLocation(program_ID, unif_name.c_str());
 	if (loc == -1) {
-		printf("ERROR : Couldnt find uniform: %s\n", unif_name.c_str());
+		myLOGD("ERROR : Couldnt find uniform: %s\n", unif_name.c_str());
 	} else {
 		return (loc);
 	}
@@ -216,7 +243,7 @@ GLint getAttribLocation(GLuint program_ID, std::string var_name) {
 
 	GLint loc = glGetAttribLocation(program_ID, var_name.c_str());
 	if (loc == -1) {
-		printf("ERROR : Unable to find attrib: %s\n", var_name.c_str());
+		myLOGD("ERROR : Unable to find attrib: %s\n", var_name.c_str());
 	} else {
 		return (loc);
 	}
@@ -374,7 +401,7 @@ void checkGLError(
         return;
     } else {
         //std::string err_str = "[FAIL] " + func_name;
-        printf("[FAIL GL] %s", func_name.c_str());
+        myLOGD("[FAIL GL] %s", func_name.c_str());
         //std::cout << "[FAIL] " << func_name << std::endl;
     }
     
@@ -385,22 +412,22 @@ void checkGLError(
             return;
             
         case GL_INVALID_ENUM:
-            printf("GL_INVALID_ENUM: GLenum argument out of range");
+            myLOGD("GL_INVALID_ENUM: GLenum argument out of range");
             //std::cout << "GL_INVALID_ENUM: GLenum argument out of range" << std::endl;
             break;
             
         case GL_INVALID_VALUE:
-            printf("GL_INVALID_VALUE: numeric argument out of range");
+            myLOGD("GL_INVALID_VALUE: numeric argument out of range");
             //std::cout << "GL_INVALID_VALUE: numeric argument out of range" << std::endl;
             break;
             
         case GL_INVALID_OPERATION:
-            printf("GL_INVALID_OPERATION: operation illegal in current state");
+            myLOGD("GL_INVALID_OPERATION: operation illegal in current state");
             //std::cout << "GL_INVALID_OPERATION: operation illegal in current state" << std::endl;
             break;
             
         case GL_INVALID_FRAMEBUFFER_OPERATION:
-            printf("GL_INVALID_FRAMEBUFFER_OPERATION: framebuffer object is not complete");
+            myLOGD("GL_INVALID_FRAMEBUFFER_OPERATION: framebuffer object is not complete");
             //std::cout << "GL_INVALID_FRAMEBUFFER_OPERATION: framebuffer object is not complete" << std::endl;
             break;
 #ifndef TARGET_IS_ANDROID

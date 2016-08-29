@@ -2,6 +2,7 @@
 #define KLTGPUH
 
 #include "gl_apis.h"
+#include "../common/mylog.h"
 
 class KLT_gpu{
 public:

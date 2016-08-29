@@ -1,5 +1,3 @@
-#version 330 core
-
 //inputs
 in vec3 vert;
 

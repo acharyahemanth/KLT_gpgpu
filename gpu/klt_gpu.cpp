@@ -16,8 +16,9 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
     
     //Shader stuff---
     //getA.fsh
-    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
-    std::string fs = std::string(BASE_TEST_DIR) + "/shaders/getA.fsh";
+    myLOGD("About to compile gpgpu_quad.vsh and getA.fsh ...");
+    std::string vs = std::string(BASE_TEST_DIR) + "shaders/gpgpu_quad.vsh";
+    std::string fs = std::string(BASE_TEST_DIR) + "shaders/getA.fsh";
     getA_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
     getA_sh_vert_id = getAttribLocation(getA_shader_id, "vert");
     getA_sh_srcimage_texture_sampler_id = getUniformLocation(getA_shader_id, "srcimage_texture_sampler");
@@ -29,10 +30,9 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
     getA_sh_pyramid_level_id = getUniformLocation(getA_shader_id, "pyramid_level");
     getA_sh_vao_id = setupQuadVAO(getA_sh_vert_id);
 
-    
     //getb.fsh
-    vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
-    fs = std::string(BASE_TEST_DIR) + "/shaders/getb.fsh";
+    vs = std::string(BASE_TEST_DIR) + "shaders/gpgpu_quad.vsh";
+    fs = std::string(BASE_TEST_DIR) + "shaders/getb.fsh";
     getb_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
     getb_sh_vert_id = getAttribLocation(getb_shader_id, "vert");
     getb_sh_srcimage_texture_sampler_id = getUniformLocation(getb_shader_id, "srcimage_texture_sampler");
@@ -48,8 +48,8 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
 
     
     //track.fsh
-    vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
-    fs = std::string(BASE_TEST_DIR) + "/shaders/track.fsh";
+    vs = std::string(BASE_TEST_DIR) + "shaders/gpgpu_quad.vsh";
+    fs = std::string(BASE_TEST_DIR) + "shaders/track.fsh";
     track_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
     track_sh_vert_id = getAttribLocation(track_shader_id, "vert");
     track_sh_A_texture_sampler_id = getUniformLocation(track_shader_id, "A_texture_sampler");
@@ -63,8 +63,8 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
     track_sh_vao_id = setupQuadVAO(track_sh_vert_id);
     
     //next_level.fsh
-    vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
-    fs = std::string(BASE_TEST_DIR) + "/shaders/next_level.fsh";
+    vs = std::string(BASE_TEST_DIR) + "shaders/gpgpu_quad.vsh";
+    fs = std::string(BASE_TEST_DIR) + "shaders/next_level.fsh";
     next_level_shader_id = LoadShaders( vs.c_str(), fs.c_str() );
     next_level_sh_vert_id = getAttribLocation(next_level_shader_id, "vert");
     next_level_sh_srcpts_texture_sampler_id = getUniformLocation(next_level_shader_id, "srcpts_texture_sampler");
@@ -73,8 +73,8 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
     next_level_sh_vao_id = setupQuadVAO(next_level_sh_vert_id);
     
     //dbgshader
-//    std::string vs = std::string(BASE_TEST_DIR) + "/shaders/gpgpu_quad.vsh";
-//    std::string fs = std::string(BASE_TEST_DIR) + "/shaders/dbg_shader.fsh";
+//    std::string vs = std::string(BASE_TEST_DIR) + "shaders/gpgpu_quad.vsh";
+//    std::string fs = std::string(BASE_TEST_DIR) + "shaders/dbg_shader.fsh";
 //    dbg_sh_id = LoadShaders( vs.c_str(), fs.c_str() );
 //    dbg_sh_vert_id = getAttribLocation(dbg_sh_id, "vert");
 //    dbg_sh_ip_texture_sampler = getUniformLocation(dbg_sh_id, "ip_texture_sampler");
@@ -85,7 +85,6 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
     
     //Reserve space in the GPU for all textures---
     setupTextures();
-
 }
 KLT_gpu::~KLT_gpu(){
     glDeleteTextures(1, &getb_sh_bmat_output.texture_id);
