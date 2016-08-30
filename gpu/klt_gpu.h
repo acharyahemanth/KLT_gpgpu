@@ -14,7 +14,7 @@ public:
                  std::vector<cv::Point2f>&tracked_pts,
                  std::vector<bool>&error);
     void execute_dbg();
-    void drawFrame(cv::Mat img, int screen_width, int screen_height);
+    void drawFrame(cv::Mat img, int screen_width, int screen_height, std::vector<cv::Point2f>tracked_corners, std::vector<bool>error);
 private:
     void iterativeTrackerAtAPyramidLevel(int pyramid_level);
     void loadTexturesWithData(cv::Mat source,

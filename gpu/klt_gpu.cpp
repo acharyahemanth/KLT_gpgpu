@@ -472,10 +472,18 @@ void KLT_gpu::execute_dbg(){
     std::cout << "GPGPU output 2 : " << std::endl << b << std::endl;
 }
 
-void KLT_gpu::drawFrame(cv::Mat img, int screen_width, int screen_height){
+void KLT_gpu::drawFrame(cv::Mat img, int screen_width, int screen_height, std::vector<cv::Point2f>tracked_corners, std::vector<bool>error){
     //Use the back_image shader
     glUseProgram(back_image_shader_id);
-    
+
+    //Draw tracked corners
+    for(int i=0;i<tracked_corners.size();i++){
+        if(!error[i]){
+            cv::circle(img, tracked_corners[i], 2, cv::Scalar(0,255,0),cv::FILLED);
+        }
+    }
+    cv::flip(img, img, 0);
+
     //Load input image into texture
     loadTexture(back_image_id,
                 0,
