@@ -472,7 +472,7 @@ void KLT_gpu::execute_dbg(){
     std::cout << "GPGPU output 2 : " << std::endl << b << std::endl;
 }
 
-void KLT_gpu::drawFrame(cv::Mat img){
+void KLT_gpu::drawFrame(cv::Mat img, int screen_width, int screen_height){
     //Use the back_image shader
     glUseProgram(back_image_shader_id);
     
@@ -492,10 +492,10 @@ void KLT_gpu::drawFrame(cv::Mat img){
     glUniform1i(back_image_sh_srcimage_texture_sampler_id, 0);
     
         
-    glUniform1i(back_image_sh_image_width_id, source_image_width);
-    glUniform1i(back_image_sh_image_height_id, source_image_height);
+    glUniform1i(back_image_sh_image_width_id, screen_width);
+    glUniform1i(back_image_sh_image_height_id, screen_height);
     
     //Run shader
     myLOGD("rendering to screen");
-    renderToScreen(back_image_sh_vao_id, source_image_width, source_image_height);
+    renderToScreen(back_image_sh_vao_id, screen_width, screen_height);
 }
