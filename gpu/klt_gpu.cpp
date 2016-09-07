@@ -9,7 +9,7 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
 
     
     //Constants
-    num_iterations_kl_tracker = 20;//20;
+    num_iterations_kl_tracker = 20;
     min_displacement_exit_criterion_kl_tracker = 1e-4;
     max_number_of_points_supported = 200;
     margin_to_declare_tracking_lost = 1;
@@ -147,8 +147,8 @@ void KLT_gpu::setupTextures(){
     }
 
     //input images
-    source_image_id = createFloatTexture(cv::Mat(), 1, source_image_width, source_image_height, GL_LINEAR);
-    dest_image_id = createFloatTexture(cv::Mat(), 1, source_image_width, source_image_height, GL_LINEAR);
+    source_image_id = createFloatTexture(cv::Mat(), 1, source_image_width, source_image_height);//GLES doesnt like this : , GL_LINEAR);
+    dest_image_id = createFloatTexture(cv::Mat(), 1, source_image_width, source_image_height);// GL_LINEAR);
     
     //display back buffer
     back_image_id = createRGBTexture(source_image_width, source_image_height);
@@ -273,6 +273,7 @@ void KLT_gpu::calcA(int pyramid_level){
     //Read back shader calculation for debug
 //    cv::Mat A = readGPGPUOutputTexture(fbo_id, outputs[0]);
 //    std::cout << "A mat -> " << std::endl << A.col(0) << std::endl;
+//    myLOGD("A mat -> %s",printMatString(A.col(3)).c_str());
 }
 
 void KLT_gpu::calcb(int pyramid_level){
@@ -315,6 +316,7 @@ void KLT_gpu::calcb(int pyramid_level){
     //Read back shader calculation for debug
 //    cv::Mat b = readGPGPUOutputTexture(fbo_id, outputs[0]);
 //    std::cout << "b mat -> " << std::endl << b << std::endl;
+//    myLOGD("b mat -> %s",printMatString(b.col(3)).c_str());
 }
 
 void KLT_gpu::track(int pyramid_level){
@@ -506,4 +508,10 @@ void KLT_gpu::drawFrame(cv::Mat img, int screen_width, int screen_height, std::v
     //Run shader
     myLOGD("rendering to screen");
     renderToScreen(back_image_sh_vao_id, screen_width, screen_height);
+}
+
+std::string KLT_gpu::printMatString(cv::Mat m){
+    std::stringstream ss;
+    ss << m;
+    return ss.str();
 }

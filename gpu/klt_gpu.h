@@ -27,6 +27,7 @@ private:
     void projectPointsToNextLevel();
     void populateOutputDS(std::vector<cv::Point2f>&tracked_pts, std::vector<bool>&error);
     void setupTextures();
+    std::string printMatString(cv::Mat);
                               
     //Shader variables
     GLuint source_image_id, dest_image_id, back_image_id;// source_points_id[2];

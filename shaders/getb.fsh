@@ -57,7 +57,7 @@ void main(){
     vec2 coord = gl_FragCoord.xy - vec2(0.5,0.5);
     
     //Current source and corresponding prediction corners
-    vec2 tex_uv = vec2(float(coord.x) / float(num_points),
+    vec2 tex_uv = vec2(float(gl_FragCoord.x) / float(num_points),
                        0.0).xy;
     vec2 source_corner = texture(srcpts_texture_sampler, tex_uv).xy;
     vec2 pred_corner = texture(predpts_texture_sampler, tex_uv).xy;

@@ -26,7 +26,7 @@ void main(){
     
     
     //glFragcoord gives the center of the pixel, ie (0,0) -> (0.5, 0.5)
-    vec2 coord = gl_FragCoord.xy - vec2(0.5,0.5);
+    //vec2 coord = gl_FragCoord.xy - vec2(0.5,0.5);
     
     //Go through all rows of current point, assemble the elements of A_t*A and A_t*b matrices
     float ata_00, ata_01, ata_11;
@@ -35,7 +35,7 @@ void main(){
     vec2 tex_uv, a_i, b_i;
     int num_rows = window_size*window_size;
     for(int r=0; r<num_rows; r++){
-        tex_uv = vec2(float(coord.x) / float(num_points),
+        tex_uv = vec2(float(gl_FragCoord.x) / float(num_points),
                       float(r) / float(num_rows)).xy;
         vec2 a_i = texture(A_texture_sampler, tex_uv).xy;
         float b_i = texture(b_texture_sampler, tex_uv).x;
@@ -60,7 +60,7 @@ void main(){
     vec2 delta = inverse(ata)*atb;
     
     //tracked_pt = prediction + delta
-    tex_uv = vec2(float(coord.x) / float(num_points),
+    tex_uv = vec2(float(gl_FragCoord.x) / float(num_points),
                   0.0).xy;
     vec2 pred_corner = texture(predpts_texture_sampler, tex_uv).xy;
     tracked_pt = pred_corner.xy + delta.xy;
