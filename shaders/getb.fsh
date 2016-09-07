@@ -64,7 +64,7 @@ void main(){
     
     
     //convert row index to an (x,y) location within the window with source pel at center
-    int half_window_size = window_size/2;
+    int half_window_size = int(float(window_size)/2.0);
     int row_number = int(coord.y);
     int window_x = int(mod(float(row_number)+EPS, float(window_size))) - half_window_size;
     int window_y = row_number/window_size - half_window_size;

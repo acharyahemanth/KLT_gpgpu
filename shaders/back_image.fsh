@@ -13,7 +13,7 @@ out vec3 frag_color;
 void main(){
     
     //glFragcoord gives the center of the pixel, ie (0,0) -> (0.5, 0.5)
-    vec2 coord = gl_FragCoord.xy - vec2(0.5,0.5);
+    vec2 coord = gl_FragCoord.xy;// - vec2(0.5,0.5);
     
     //Current source corner
     vec2 tex_uv = vec2(float(coord.x) / float(image_width),
