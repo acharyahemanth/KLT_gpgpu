@@ -66,7 +66,7 @@ int main(){
 
         long long unsigned start = currentTimeInMilliseconds();
         klt.execute(prev_image, query_gray, input_corners, tracked_corners, error);
-        klt.drawFrame(query_small);
+//        klt.drawFrame(query_small);
         std::cout << "Exec time : " << (int)(currentTimeInMilliseconds() - start) << std::endl;
 
         input_corners.clear();

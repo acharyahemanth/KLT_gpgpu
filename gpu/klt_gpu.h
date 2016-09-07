@@ -3,6 +3,8 @@
 
 #include "gl_apis.h"
 #include "../common/mylog.h"
+#include <opencv2/opencv.hpp>
+
 
 class KLT_gpu{
 public:
@@ -15,6 +17,12 @@ public:
                  std::vector<bool>&error);
     void execute_dbg();
     void drawFrame(cv::Mat img, int screen_width, int screen_height, std::vector<cv::Point2f>tracked_corners, std::vector<bool>error);
+    void execute_ocv(cv::Mat source,
+                     cv::Mat dest,
+                     std::vector<cv::Point2f>src_pts,
+                     std::vector<cv::Point2f>&tracked_pts,
+                     std::vector<bool>&error);
+
 private:
     void iterativeTrackerAtAPyramidLevel(int pyramid_level);
     void loadTexturesWithData(cv::Mat source,
