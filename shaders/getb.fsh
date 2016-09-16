@@ -20,24 +20,72 @@ layout(location=0) out float b;
 
 float EPS = 1e-5;
 
+//#define GL_LINEAR_SAMPLING_AVAILABLE
+
+//A--B
+//D--C
+float blt(float x, float y, sampler2D sampler){
+    float lu_x = int(x);
+    float lu_y = int(y);
+    float rd_x = int(x+1);
+    float rd_y = int(y+1);
+    float alpha_x = x-lu_x;
+    float alpha_y = y-lu_y;
+    
+    lu_x += 0.5;
+    lu_y += 0.5;
+    rd_x += 0.5;
+    rd_y += 0.5;
+    
+    
+    //Get pels of corner of square
+    vec2 tex_A = vec2(float(lu_x) / float(image_width),
+                      float(lu_y) / float(image_height));
+    vec2 tex_B = vec2(float(rd_x) / float(image_width),
+                      float(lu_y) / float(image_height));
+    vec2 tex_C = vec2(float(rd_x) / float(image_width),
+                      float(rd_y) / float(image_height));
+    vec2 tex_D = vec2(float(lu_x) / float(image_width),
+                      float(rd_y) / float(image_height));
+    float pel_A = texture(sampler, tex_A).x;
+    float pel_B = texture(sampler, tex_B).x;
+    float pel_C = texture(sampler, tex_C).x;
+    float pel_D = texture(sampler, tex_D).x;
+    
+    
+    float x_interp_lu = (1-alpha_x)*pel_A + alpha_x*pel_B;
+    float x_interp_rd = (1-alpha_x)*pel_D + alpha_x*pel_C;
+    float final_interp_val = (1-alpha_y)*x_interp_lu + alpha_y*x_interp_rd;
+    
+    return final_interp_val;
+}
+
 //Returns the pixel value from source img at the pel specified at the pyramid level specified
 float getSourcePel(vec2 pel){
     float shift = float(1<<pyramid_level);
     vec2 pel_level0 = vec2(pel.x*shift, pel.y*shift).xy;
+#ifdef GL_LINEAR_SAMPLING_AVAILABLE
     pel_level0 = pel_level0 + vec2(0.5,0.5);
     vec2 tex_uv = vec2(float(pel_level0.x) / float(image_width),
                        float(pel_level0.y) / float(image_height)).xy;
     return texture(srcimage_texture_sampler, tex_uv).x;
+#else
+    return blt(pel_level0.x, pel_level0.y, srcimage_texture_sampler);
+#endif
 }
 
 //Returns the pixel value from dest img at the pel specified at the pyramid level specified
 float getDestPel(vec2 pel){
     float shift = float(1<<pyramid_level);
     vec2 pel_level0 = vec2(pel.x*shift, pel.y*shift).xy;
+#ifdef GL_LINEAR_SAMPLING_AVAILABLE
     pel_level0 = pel_level0 + vec2(0.5,0.5);
     vec2 tex_uv = vec2(float(pel_level0.x) / float(image_width),
                        float(pel_level0.y) / float(image_height)).xy;
     return texture(dstimage_texture_sampler, tex_uv).x;
+#else
+    return blt(pel_level0.x, pel_level0.y, dstimage_texture_sampler);
+#endif
 }
 
 

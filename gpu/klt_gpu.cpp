@@ -9,8 +9,8 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
 
     
     //Constants
-    num_iterations_kl_tracker = 20;//TODO : need to bail out earlier if all points have been tracked!
-    min_displacement_exit_criterion_kl_tracker = 1e-4;
+    num_iterations_kl_tracker = 10;//TODO : need to bail out earlier if all points have been tracked!
+    min_displacement_exit_criterion_kl_tracker = 1e-2;
     max_number_of_points_supported = 300;
     margin_to_declare_tracking_lost = 1;
     
@@ -569,12 +569,12 @@ bool KLT_gpu::isNextIterationReqd(){
     outputs[0] = point_shift_delta;
     outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
     cv::Mat is_points_tracked_mat = readGPGPUOutputTexture(fbo_id, outputs[0]);
-    std::cout << is_points_tracked_mat.at<float>(0,31) << std::endl;
     int num_tracked_pts=0;
     for(int i=0;i<total_number_points_being_tracked;i++){
         if(is_points_tracked_mat.at<float>(0,i) < min_displacement_exit_criterion_kl_tracker)
             num_tracked_pts++;
     }
+    std::cout << "# pts which are done : " << num_tracked_pts << std::endl;
     if(num_tracked_pts == total_number_points_being_tracked){
         std::cout << "All points are tracked! No more iterations reqd!" << std::endl;
         return true;

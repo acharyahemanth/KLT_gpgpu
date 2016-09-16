@@ -69,6 +69,6 @@ void main(){
     
     int shift = (1<<pyramid_level);
     vec2 delta_level0 = vec2(float(delta.x*float(shift)), float(delta.y*float(shift))).xy;
-    is_point_tracked = length(delta_level0);
-//    point_shift_delta = length(delta);
+    point_shift_delta = length(delta_level0);
+    point_shift_delta = length(delta);
 }
