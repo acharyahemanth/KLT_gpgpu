@@ -9,9 +9,9 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
 
     
     //Constants
-    num_iterations_kl_tracker = 20;
+    num_iterations_kl_tracker = 20;//TODO : need to bail out earlier if all points have been tracked!
     min_displacement_exit_criterion_kl_tracker = 1e-4;
-    max_number_of_points_supported = 200;
+    max_number_of_points_supported = 300;
     margin_to_declare_tracking_lost = 1;
     
     //Shader stuff---
