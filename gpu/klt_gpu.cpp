@@ -98,6 +98,8 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
     setupTextures();
 }
 KLT_gpu::~KLT_gpu(){
+    myLOGD("~KLT_gpu()");
+#ifndef TARGET_IS_ANDROID
     glDeleteTextures(1, &getb_sh_bmat_output.texture_id);
     glDeleteTextures(1, &getA_sh_Amat_output.texture_id);
     for(int i=0;i<2;i++){
@@ -106,6 +108,7 @@ KLT_gpu::~KLT_gpu(){
     }
     glDeleteTextures(1,&source_image_id);
     glDeleteTextures(1,&dest_image_id);
+#endif
 }
 
 void KLT_gpu::setupTextures(){
