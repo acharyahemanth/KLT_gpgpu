@@ -17,12 +17,11 @@ uniform sampler2D predpts_texture_sampler;
 //a) tracked_pt = pred_pt + (AtA).inv()*At*b
 //b) weights : 1 if point is in, 0 if its out
 layout(location=0) out vec2 tracked_pt;
-//layout(location=1) out float w;
+layout(location=1) out float point_shift_delta;
 
 void main(){
     image_width;
     image_height;
-    pyramid_level;
     
     
     //glFragcoord gives the center of the pixel, ie (0,0) -> (0.5, 0.5)
@@ -67,4 +66,9 @@ void main(){
     
     //check if its within image boundary : todo!
 //    w = 1.0;
+    
+    int shift = (1<<pyramid_level);
+    vec2 delta_level0 = vec2(float(delta.x*float(shift)), float(delta.y*float(shift))).xy;
+    is_point_tracked = length(delta_level0);
+//    point_shift_delta = length(delta);
 }

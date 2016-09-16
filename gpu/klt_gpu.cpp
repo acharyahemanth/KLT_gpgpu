@@ -148,7 +148,16 @@ void KLT_gpu::setupTextures(){
                                                                       track_sh_prediction_output[i].width,
                                                                       1);
     }
-
+//  output of track.fsh
+    point_shift_delta.width = max_number_of_points_supported;
+    point_shift_delta.height = 1;
+    point_shift_delta.num_components_per_element = 1;
+    point_shift_delta.texture_id = createFloatTexture(cv::Mat(),
+                                                     point_shift_delta.num_components_per_element,
+                                                     point_shift_delta.width,
+                                                     point_shift_delta.height);
+    
+    
     //input images
     source_image_id = createFloatTexture(cv::Mat(), 1, source_image_width, source_image_height);//GLES doesnt like this : , GL_LINEAR);
     dest_image_id = createFloatTexture(cv::Mat(), 1, source_image_width, source_image_height);// GL_LINEAR);
@@ -216,6 +225,7 @@ void KLT_gpu::iterativeTrackerAtAPyramidLevel(int pyramid_level){
         track(pyramid_level);
 
         //Check if any more iterations are reqd---
+//        bool is_next_iteration_reqd = isNextIterationReqd();
 
         //Swap ping pong buffers for next iteration---
         ppong_idx_iterations = (ppong_idx_iterations+1)%2;
@@ -349,9 +359,12 @@ void KLT_gpu::track(int pyramid_level){
     glUniform1i(track_sh_pyramid_level_id, pyramid_level);
     
     //Run shader
-    std::vector<GPGPUOutputTexture>outputs(1);
+    std::vector<GPGPUOutputTexture>outputs(2);
     outputs[0] = track_sh_prediction_output[(ppong_idx_iterations+1)%2];
     outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
+    outputs[1] = point_shift_delta;
+    outputs[1].color_attachment = GL_COLOR_ATTACHMENT1;
+
     
     runGPGPU(fbo_id, track_sh_vao_id, outputs);
     
@@ -543,5 +556,29 @@ void KLT_gpu::execute_ocv(cv::Mat source,
         if(status[i])
             error[i] = false;
     }
+}
+
+bool KLT_gpu::isNextIterationReqd(){
+    glBindFramebuffer(GL_FRAMEBUFFER, fbo_id);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D,
+                           point_shift_delta.texture_id, 0);
+    
+    
+    //Read the is_pt_tracked
+    std::vector<GPGPUOutputTexture>outputs(1);
+    outputs[0] = point_shift_delta;
+    outputs[0].color_attachment = GL_COLOR_ATTACHMENT0;
+    cv::Mat is_points_tracked_mat = readGPGPUOutputTexture(fbo_id, outputs[0]);
+    std::cout << is_points_tracked_mat.at<float>(0,31) << std::endl;
+    int num_tracked_pts=0;
+    for(int i=0;i<total_number_points_being_tracked;i++){
+        if(is_points_tracked_mat.at<float>(0,i) < min_displacement_exit_criterion_kl_tracker)
+            num_tracked_pts++;
+    }
+    if(num_tracked_pts == total_number_points_being_tracked){
+        std::cout << "All points are tracked! No more iterations reqd!" << std::endl;
+        return true;
+    }
+    return false;
 }
 

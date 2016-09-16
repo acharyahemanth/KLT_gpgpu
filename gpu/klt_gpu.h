@@ -22,6 +22,7 @@ public:
                      std::vector<cv::Point2f>src_pts,
                      std::vector<cv::Point2f>&tracked_pts,
                      std::vector<bool>&error);
+    bool isNextIterationReqd();
 
 private:
     void iterativeTrackerAtAPyramidLevel(int pyramid_level);
@@ -66,6 +67,7 @@ private:
     GPGPUOutputTexture getb_sh_bmat_output;
     GPGPUOutputTexture track_sh_prediction_output[2];
     GPGPUOutputTexture next_sh_source_points_output[2];
+    GPGPUOutputTexture point_shift_delta;
     
     int num_pyramid_levels, window_size;
     int num_iterations_kl_tracker;
