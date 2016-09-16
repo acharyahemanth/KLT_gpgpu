@@ -539,7 +539,10 @@ void KLT_gpu::execute_ocv(cv::Mat source,
                           std::vector<bool>&error){
     tracked_pts.clear();
     error.clear();
-    
+
+    if(src_pts.size() == 0)
+        return;
+
     std::vector<unsigned char>status;
     cv::Mat err_mat;
     tracked_pts.resize(src_pts.size());

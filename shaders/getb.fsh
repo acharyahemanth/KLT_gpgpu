@@ -25,19 +25,19 @@ float EPS = 1e-5;
 //A--B
 //D--C
 float blt(float x, float y, sampler2D sampler){
-    float lu_x = int(x);
-    float lu_y = int(y);
-    float rd_x = int(x+1);
-    float rd_y = int(y+1);
+    float lu_x = float(int(x));
+    float lu_y = float(int(y));
+    float rd_x = float(int(x+1.0));
+    float rd_y = float(int(y+1.0));
     float alpha_x = x-lu_x;
     float alpha_y = y-lu_y;
-    
+
     lu_x += 0.5;
     lu_y += 0.5;
     rd_x += 0.5;
     rd_y += 0.5;
-    
-    
+
+
     //Get pels of corner of square
     vec2 tex_A = vec2(float(lu_x) / float(image_width),
                       float(lu_y) / float(image_height));
@@ -51,11 +51,11 @@ float blt(float x, float y, sampler2D sampler){
     float pel_B = texture(sampler, tex_B).x;
     float pel_C = texture(sampler, tex_C).x;
     float pel_D = texture(sampler, tex_D).x;
-    
-    
-    float x_interp_lu = (1-alpha_x)*pel_A + alpha_x*pel_B;
-    float x_interp_rd = (1-alpha_x)*pel_D + alpha_x*pel_C;
-    float final_interp_val = (1-alpha_y)*x_interp_lu + alpha_y*x_interp_rd;
+
+
+    float x_interp_lu = (1.0-alpha_x)*pel_A + alpha_x*pel_B;
+    float x_interp_rd = (1.0-alpha_x)*pel_D + alpha_x*pel_C;
+    float final_interp_val = (1.0-alpha_y)*x_interp_lu + alpha_y*x_interp_rd;
     
     return final_interp_val;
 }
