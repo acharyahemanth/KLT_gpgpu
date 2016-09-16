@@ -3,9 +3,9 @@ precision highp float;
 //Uniforms
 uniform int num_points;
 uniform int window_size;
-uniform int image_width;
-uniform int image_height;
-uniform int pyramid_level;
+//uniform int image_width;
+//uniform int image_height;
+//uniform int pyramid_level;
 
 //Texture samplers
 uniform sampler2D A_texture_sampler;
@@ -20,8 +20,8 @@ layout(location=0) out vec2 tracked_pt;
 layout(location=1) out float point_shift_delta;
 
 void main(){
-    image_width;
-    image_height;
+    //image_width;
+    //image_height;
     
     
     //glFragcoord gives the center of the pixel, ie (0,0) -> (0.5, 0.5)
@@ -67,8 +67,8 @@ void main(){
     //check if its within image boundary : todo!
 //    w = 1.0;
     
-    int shift = (1<<pyramid_level);
-    vec2 delta_level0 = vec2(float(delta.x*float(shift)), float(delta.y*float(shift))).xy;
-    point_shift_delta = length(delta_level0);
+    //int shift = (1<<pyramid_level);
+    //vec2 delta_level0 = vec2(float(delta.x*float(shift)), float(delta.y*float(shift))).xy;
+    //point_shift_delta = length(delta_level0);
     point_shift_delta = length(delta);
 }

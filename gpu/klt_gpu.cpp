@@ -56,9 +56,9 @@ KLT_gpu::KLT_gpu(int num_pyramid_levels, int window_size, int image_width, int i
     track_sh_predpts_texture_sampler_id = getUniformLocation(track_shader_id, "predpts_texture_sampler");
     track_sh_num_points_id = getUniformLocation(track_shader_id, "num_points");
     track_sh_window_size_id = getUniformLocation(track_shader_id, "window_size");
-    track_sh_image_width_id = getUniformLocation(track_shader_id, "image_width");
-    track_sh_image_height_id = getUniformLocation(track_shader_id, "image_height");
-    track_sh_pyramid_level_id = getUniformLocation(track_shader_id, "pyramid_level");
+//    track_sh_image_width_id = getUniformLocation(track_shader_id, "image_width");
+//    track_sh_image_height_id = getUniformLocation(track_shader_id, "image_height");
+//    track_sh_pyramid_level_id = getUniformLocation(track_shader_id, "pyramid_level");
     track_sh_vao_id = setupQuadVAO(track_sh_vert_id);
     
     //next_level.fsh
@@ -354,9 +354,9 @@ void KLT_gpu::track(int pyramid_level){
     
     glUniform1i(track_sh_num_points_id, max_number_of_points_supported);
     glUniform1i(track_sh_window_size_id, window_size);
-    glUniform1i(track_sh_image_width_id, source_image_width);
-    glUniform1i(track_sh_image_height_id, source_image_height);
-    glUniform1i(track_sh_pyramid_level_id, pyramid_level);
+//    glUniform1i(track_sh_image_width_id, source_image_width);
+//    glUniform1i(track_sh_image_height_id, source_image_height);
+//    glUniform1i(track_sh_pyramid_level_id, pyramid_level);
     
     //Run shader
     std::vector<GPGPUOutputTexture>outputs(2);
